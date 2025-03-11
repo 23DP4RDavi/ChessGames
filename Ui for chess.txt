@@ -1,0 +1,9 @@
+Ui for chess
+- board (light mahagani, dark red wood)
+- pieces (light birtch, dark oak)
+- what pieces have been captured and how many points (1 point to a pawn, 3 points to a knight or bishop, 5 points to a rook and 9 points to a queen)
+- gray dot where you can go with the selected piece
+- king glows red when its getting check mated
+- king falls over when it loses
+- timer of selected amount 
+- 
