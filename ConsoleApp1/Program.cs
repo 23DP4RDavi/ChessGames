@@ -5,6 +5,7 @@
         // Change text color to green
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("This text is green.");
+        Console.WriteLine("Hello World!");
 
         // Change text color to red
         Console.ForegroundColor = ConsoleColor.Red;
