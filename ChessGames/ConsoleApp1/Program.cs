@@ -8,19 +8,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            if (IsConsoleAvailable())
-            {
-                ShowMenu();
-            }
-            else
-            {
-                MessageBox.Show("Console is not available. Please run this application in a console environment.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        static void ShowMenu()
-        {
-            string[] menuItems = { "New Game", "Load Game", "Exit" };
+            string[] menuItems = { "New Game", "Load Game", "Exit", "AHHHHHHH", "HAAAAAAAAAAAAAA" };
             int selectedIndex = 0;
 
             ConsoleKey key;
@@ -72,19 +60,6 @@ namespace ConsoleApp1
                     Console.WriteLine("Exiting...");
                     Environment.Exit(0);
                     break;
-            }
-        }
-
-        static bool IsConsoleAvailable()
-        {
-            try
-            {
-                int windowHeight = Console.WindowHeight;
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
     }
