@@ -7,3 +7,19 @@ Ui for chess
 - king falls over when it loses
 - timer of selected amount 
 - 
+
+Console Ui
+- main menu, where you can pick to "Start a new game", "Load a old game", "Add a player", "Exit"
+
+"Start a new game"
+- You can start a new game
+- Select a game mode (chess or checkers)
+
+"Load a old game"
+- You can select an old game uploading JSON
+
+"Add a player"
+- You can add an player name and manage existing names
+
+"Exit"
+- duhhh exit

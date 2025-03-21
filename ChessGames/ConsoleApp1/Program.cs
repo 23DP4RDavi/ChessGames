@@ -8,7 +8,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string[] menuItems = { "New Game", "Load Game", "Exit", "AHHHHHHH", "HAAAAAAAAAAAAAA" };
+            string[] menuItems = { "New Game", "Load Game", "Exit"};
             int selectedIndex = 0;
 
             ConsoleKey key;

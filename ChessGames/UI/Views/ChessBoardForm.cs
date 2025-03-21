@@ -68,8 +68,8 @@ namespace ChessGames.UI
 
         private void Tile_Click(object sender, EventArgs e)
         {
-            Panel clickedTile = sender as Panel;
-            MessageBox.Show($"Tile clicked at location: {clickedTile.Location}");
+            Panel tile = sender as Panel;
+            MessageBox.Show($"Tile clicked at location: {tile.Location}");
         }
     }
 }
