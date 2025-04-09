@@ -1,20 +1,20 @@
 using System;
-using ConsoleApp1.Menus;
+using ChessGames.UI;
 
-namespace ConsoleApp1
+namespace ConsoleApp1.Menus
 {
-    class Program
+    public class NewGame
     {
-        static void Main(string[] args)
+        public static void StartNewGame()
         {
-            string[] MainMenu = { "New Game", "Load Game", "Players", "Exit" };
+            string[] MainMenu = { "Chess", "Checkers", "Go Back" };
             int selectedIndex = 0;
 
             ConsoleKey key;
             do
             {
                 Console.Clear();
-                Console.WriteLine("Welcome to Chess Games");
+                Console.WriteLine("Select the game you want to play:");
                 for (int i = 0; i < MainMenu.Length; i++)
                 {
                     if (i == selectedIndex)
@@ -48,21 +48,17 @@ namespace ConsoleApp1
             switch (selectedIndex)
             {
                 case 0:
-                    NewGame.StartNewGame();
+                    ChessBoardForm chessForm = new ChessBoardForm();
+                    chessForm.ShowDialog();
                     break;
                 case 1:
-                    Console.WriteLine("Load Game selected");
+                    Console.WriteLine("Checkers selected");
 
-
-                    Console.WriteLine("Press any key to return to the main menu...");
+                    Console.WriteLine("Press any key to return to the menu...");
                     Console.ReadKey();
                     break;
                 case 2:
-                    Players.PlayersMenu();
-                    break;
-                case 3:
-                    Console.WriteLine("Exiting...");
-                    Environment.Exit(0);
+                    Console.WriteLine("Returning to the main menu...");
                     break;
             }
         }

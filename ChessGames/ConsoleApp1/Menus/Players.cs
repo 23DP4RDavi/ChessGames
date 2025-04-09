@@ -1,20 +1,19 @@
 using System;
-using ConsoleApp1.Menus;
 
-namespace ConsoleApp1
+namespace ConsoleApp1.Menus
 {
-    class Program
+    public class Players
     {
-        static void Main(string[] args)
+        public static void PlayersMenu()
         {
-            string[] MainMenu = { "New Game", "Load Game", "Players", "Exit" };
+            string[] MainMenu = { "See players", "Add player", "Go Back" };
             int selectedIndex = 0;
 
             ConsoleKey key;
             do
             {
                 Console.Clear();
-                Console.WriteLine("Welcome to Chess Games");
+                Console.WriteLine("Players Menu:");
                 for (int i = 0; i < MainMenu.Length; i++)
                 {
                     if (i == selectedIndex)
@@ -40,7 +39,7 @@ namespace ConsoleApp1
                         HandleMenuSelection(selectedIndex);
                         break;
                 }
-            } while (key != ConsoleKey.Enter || selectedIndex != 2);
+            } while (!(key == ConsoleKey.Enter && selectedIndex == 2));
         }
 
         static void HandleMenuSelection(int selectedIndex)
@@ -48,21 +47,20 @@ namespace ConsoleApp1
             switch (selectedIndex)
             {
                 case 0:
-                    NewGame.StartNewGame();
+                    Console.WriteLine("Displaying players...");
+                    // Add logic to display players
+                    Console.WriteLine("Press any key to return to the menu...");
+                    Console.ReadKey();
                     break;
                 case 1:
-                    Console.WriteLine("Load Game selected");
-
-
-                    Console.WriteLine("Press any key to return to the main menu...");
+                    Console.WriteLine("Add player selected...");
+                    // Add logic to add a player
+                    Console.WriteLine("Press any key to return to the menu...");
                     Console.ReadKey();
                     break;
                 case 2:
-                    Players.PlayersMenu();
-                    break;
-                case 3:
-                    Console.WriteLine("Exiting...");
-                    Environment.Exit(0);
+                    Console.WriteLine("Returning to the main menu...");
+                    // No additional logic needed for "Go Back"
                     break;
             }
         }

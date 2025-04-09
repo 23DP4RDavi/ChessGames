@@ -31,8 +31,8 @@ namespace ChessGames.UI
         {
             try
             {
-                whiteTileImage = Image.FromFile(@"..\\UI\\Views\\Image\\white.png");
-                blackTileImage = Image.FromFile(@"..\\UI\\Views\\Image\\black.png");
+                whiteTileImage = Image.FromFile(@"..\\ConsoleApp1\\UI\\Image\\white.png");
+                blackTileImage = Image.FromFile(@"..\\ConsoleApp1\\UI\\Image\\black.png");
             }
             catch (Exception ex)
             {
