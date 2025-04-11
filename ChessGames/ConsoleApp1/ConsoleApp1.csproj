@@ -4,8 +4,4 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\UI\UI.csproj" />
-  </ItemGroup>
 </Project>
