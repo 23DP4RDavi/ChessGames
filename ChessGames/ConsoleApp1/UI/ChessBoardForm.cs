@@ -37,7 +37,7 @@ namespace ChessGames.UI
 
         private void LoadTileBackgrounds()
         {
-            string imagePath = @"..\\ConsoleApp1\\UI\\Image\\";
+            string imagePath = @"..\\..\\..\\UI\\Image\\";
             try
             {
                 whiteTileBackground = Image.FromFile(Path.Combine(imagePath, "white.png"));
@@ -51,7 +51,7 @@ namespace ChessGames.UI
 
         private void LoadPieceImages()
         {
-            string imagePath = @"..\\ConsoleApp1\\UI\\Image\\Chess\\";
+            string imagePath = @"..\\..\\..\\UI\\Image\\Chess\\";
             try
             {
                 pieceImages["WPawn"] = Image.FromFile(Path.Combine(imagePath, "pawn.png"));

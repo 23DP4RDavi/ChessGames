@@ -10,7 +10,7 @@
             "args": [],
             "cwd": "${workspaceFolder}/ChessGames/ConsoleApp1",
             "stopAtEntry": false,
-            "console": "integratedTerminal",
+            "console": "externalTerminal", // Ensures the app runs in an external terminal
             "internalConsoleOptions": "neverOpen"
         }
     ]
