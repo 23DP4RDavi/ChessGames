@@ -52,8 +52,8 @@ namespace CheckersGames.UI
             string imagePath = @"..\\..\\..\\UI\\Image\\Checkers\\";
             try
             {
-                pieceImages["WhitePiece"] = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
-                pieceImages["BlackPiece"] = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
+                blackTileBackground = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
+                blackTileBackground = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
             }
             catch (Exception ex)
             {

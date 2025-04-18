@@ -59,7 +59,7 @@ namespace ChessGames.UI
                 pieceImages["WRook"] = Image.FromFile(Path.Combine(imagePath, "w_Rook.png"));
                 pieceImages["BRook"] = Image.FromFile(Path.Combine(imagePath, "b_Rook.png"));
                 pieceImages["WKnight"] = Image.FromFile(Path.Combine(imagePath, "w_Knight.png"));
-                pieceImages["BKnight"] = Image.FromFile(Path.Combine(imagePath, "b_knight.png"));
+                pieceImages["BKnight"] = Image.FromFile(Path.Combine(imagePath, "b_Knight.png"));
                 pieceImages["WBishop"] = Image.FromFile(Path.Combine(imagePath, "w_Bishop.png"));
                 pieceImages["BBishop"] = Image.FromFile(Path.Combine(imagePath, "b_Bishop.png"));
                 pieceImages["WQueen"] = Image.FromFile(Path.Combine(imagePath, "w_Queen.png"));
