@@ -141,27 +141,15 @@ namespace CheckersGames.UI
 
         private string GetCheckersPiece(int row, int col)
         {
-            // Define the initial positions for checkers pieces
             if (row < 3 && (row + col) % 2 != 0)
             {
-                return "BlackPiece"; // Black pieces
+                return "BlackPiece";
             }
             else if (row > 4 && (row + col) % 2 != 0)
             {
-                return "WhitePiece"; // White pieces
+                return "WhitePiece";
             }
-            return null; // No piece on this tile
-        }
-    }
-
-    static class Program
-    {
-        [STAThread]
-        static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CheckersBoardForm());
+            return null;
         }
     }
 }

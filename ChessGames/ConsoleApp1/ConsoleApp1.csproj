@@ -4,7 +4,4 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="UI\CheckersBoardForm.cs" />
-  </ItemGroup>
 </Project>
