@@ -5,32 +5,30 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using ConsoleApp1.Games;
 
-namespace ChessGames.UI
+namespace CheckersGames.UI
 {
-    public class ChessBoardForm : Form
+    public class CheckersBoardForm : Form
     {
         private const int TileSize = 60;
         private const int GridSize = 8;
         private Panel[,] tiles = new Panel[GridSize, GridSize];
-        private ChessLogic chessLogic;
         private Dictionary<string, Image> pieceImages;
         private Image whiteTileBackground;
         private Image blackTileBackground;
 
-        public ChessBoardForm()
+        public CheckersBoardForm()
         {
-            chessLogic = new ChessLogic();
             pieceImages = new Dictionary<string, Image>();
             InitializeComponent();
             LoadTileBackgrounds();
             LoadPieceImages();
-            CreateChessBoard();
-            RenderPieces();
+            CreateCheckersBoard();
+            RenderCheckersPieces();
         }
 
         private void InitializeComponent()
         {
-            this.Text = "Chess Board";
+            this.Text = "Checkers Board";
             this.BackColor = Color.Black;
             this.Size = new Size(TileSize * GridSize + 16, TileSize * GridSize + 39);
         }
@@ -51,21 +49,11 @@ namespace ChessGames.UI
 
         private void LoadPieceImages()
         {
-            string imagePath = @"..\\..\\..\\UI\\Image\\Chess\\";
+            string imagePath = @"..\\..\\..\\UI\\Image\\Checkers\\";
             try
             {
-                pieceImages["WPawn"] = Image.FromFile(Path.Combine(imagePath, "w_Pawn.png"));
-                pieceImages["BPawn"] = Image.FromFile(Path.Combine(imagePath, "b_Pawn.png"));
-                pieceImages["WRook"] = Image.FromFile(Path.Combine(imagePath, "w_Rook.png"));
-                pieceImages["BRook"] = Image.FromFile(Path.Combine(imagePath, "b_Rook.png"));
-                pieceImages["WKnight"] = Image.FromFile(Path.Combine(imagePath, "w_Knight_f.png"));
-                pieceImages["BKnight"] = Image.FromFile(Path.Combine(imagePath, "b_knight_b.png"));
-                pieceImages["WBishop"] = Image.FromFile(Path.Combine(imagePath, "w_Bishop.png"));
-                pieceImages["BBishop"] = Image.FromFile(Path.Combine(imagePath, "b_Bishop.png"));
-                pieceImages["WQueen"] = Image.FromFile(Path.Combine(imagePath, "w_Queen.png"));
-                pieceImages["BQueen"] = Image.FromFile(Path.Combine(imagePath, "b_Queen.png"));
-                pieceImages["WKing"] = Image.FromFile(Path.Combine(imagePath, "w_King.png"));
-                pieceImages["BKing"] = Image.FromFile(Path.Combine(imagePath, "b_King.png"));
+                pieceImages["WhitePiece"] = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
+                pieceImages["BlackPiece"] = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
             }
             catch (Exception ex)
             {
@@ -73,7 +61,7 @@ namespace ChessGames.UI
             }
         }
 
-        private void CreateChessBoard()
+        private void CreateCheckersBoard()
         {
             for (int row = 0; row < GridSize; row++)
             {
@@ -104,7 +92,7 @@ namespace ChessGames.UI
             MessageBox.Show($"Tile clicked at row {row}, column {col}");
         }
 
-        private void RenderPieces()
+        private void RenderCheckersPieces()
         {
             for (int row = 0; row < GridSize; row++)
             {
@@ -112,7 +100,8 @@ namespace ChessGames.UI
                 {
                     Image tileBackground = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground;
 
-                    string piece = chessLogic.Board[row, col];
+                    // Determine if a piece should be placed on this tile
+                    string piece = GetCheckersPiece(row, col);
                     if (piece != null && pieceImages.ContainsKey(piece))
                     {
                         Bitmap combinedImage = new Bitmap(TileSize, TileSize);
@@ -148,6 +137,31 @@ namespace ChessGames.UI
                     tiles[row, col].BackgroundImageLayout = ImageLayout.None; // Prevent stretching
                 }
             }
+        }
+
+        private string GetCheckersPiece(int row, int col)
+        {
+            // Define the initial positions for checkers pieces
+            if (row < 3 && (row + col) % 2 != 0)
+            {
+                return "BlackPiece"; // Black pieces
+            }
+            else if (row > 4 && (row + col) % 2 != 0)
+            {
+                return "WhitePiece"; // White pieces
+            }
+            return null; // No piece on this tile
+        }
+    }
+
+    static class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new CheckersBoardForm());
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
-using ChessGames.UI;
+using ChessGames.UI; // For ChessBoardForm
+using CheckersGames.UI; // Correct namespace for CheckersBoardForm
 
 namespace ConsoleApp1.Menus
 {
@@ -52,10 +53,8 @@ namespace ConsoleApp1.Menus
                     chessForm.ShowDialog();
                     break;
                 case 1:
-                    Console.WriteLine("Checkers selected");
-
-                    Console.WriteLine("Press any key to return to the menu...");
-                    Console.ReadKey();
+                    CheckersBoardForm checkersForm = new CheckersBoardForm();
+                    checkersForm.ShowDialog();
                     break;
                 case 2:
                     Console.WriteLine("Returning to the main menu...");
