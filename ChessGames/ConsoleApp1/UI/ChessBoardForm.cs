@@ -68,6 +68,7 @@ namespace ChessGames.UI
         private void InitializeGame()
         {
             chessLogic = new ChessLogic();
+            chessLogic.OnPawnPromotion += HandlePawnPromotion; // Subscribe to the event
             pieceImages = new Dictionary<string, Image>();
             LoadTileBackgrounds();
             LoadPieceImages();
@@ -327,6 +328,55 @@ namespace ChessGames.UI
             int milliseconds = timeRemaining % 1000;
 
             timerLabel.Text = $"{minutes:D2}:{seconds:D2}:{milliseconds:D3}";
+        }
+
+        private string ShowPromotionDialog(string playerColor)
+        {
+            Form promotionForm = new Form
+            {
+                Text = "Pawn Promotion",
+                Size = new Size(300, 150),
+                StartPosition = FormStartPosition.CenterParent
+            };
+
+            FlowLayoutPanel panel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+
+            string[] pieces = { "Queen", "Rook", "Bishop", "Knight" };
+            string selectedPiece = "Queen";
+
+            foreach (string piece in pieces)
+            {
+                Button button = new Button
+                {
+                    Text = piece,
+                    Tag = playerColor + piece[0], // e.g., "WQ" for White Queen
+                    Size = new Size(60, 60)
+                };
+
+                button.Click += (sender, e) =>
+                {
+                    selectedPiece = (string)((Button)sender).Tag;
+                    promotionForm.Close();
+                };
+
+                panel.Controls.Add(button);
+            }
+
+            promotionForm.Controls.Add(panel);
+            promotionForm.ShowDialog();
+
+            return selectedPiece;
+        }
+
+        private void HandlePawnPromotion(string playerColor, int row, int col)
+        {
+            string promotedPiece = ShowPromotionDialog(playerColor);
+            chessLogic.Board[row, col] = promotedPiece; // Update the board with the selected piece
+            RenderPieces(); // Re-render the board
         }
     }
 }

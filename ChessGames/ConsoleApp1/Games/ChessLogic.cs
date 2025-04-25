@@ -9,6 +9,7 @@ namespace ConsoleApp1.Games
         public (int x, int y) WhiteKingPosition { get; private set; }
         public (int x, int y) BlackKingPosition { get; private set; }
         private bool isWhiteTurn = true; // Track whose turn it is (true = White's turn, false = Black's turn)
+        public event Action<string, int, int> OnPawnPromotion; // Event for pawn promotion
 
         public ChessLogic()
         {
@@ -42,65 +43,27 @@ namespace ConsoleApp1.Games
 
         public bool MovePiece(int startX, int startY, int endX, int endY)
         {
-            Console.WriteLine($"Attempting to move piece from ({startX}, {startY}) to ({endX}, {endY})");
-
-            if (!IsWithinBounds(startX, startY) || !IsWithinBounds(endX, endY))
+            // Validate the move
+            if (!IsValidMove(Board[startX, startY], startX, startY, endX, endY))
             {
-                Console.WriteLine("Move failed: Indices out of bounds.");
                 return false;
             }
 
+            // Perform the move
             string piece = Board[startX, startY];
-            if (piece == null)
-            {
-                Console.WriteLine("Move failed: No piece at the starting position.");
-                return false;
-            }
-
-            // Check if it's the correct player's turn
-            if ((isWhiteTurn && !piece.StartsWith("W")) || (!isWhiteTurn && !piece.StartsWith("B")))
-            {
-                Console.WriteLine("Move failed: It's not your turn.");
-                return false;
-            }
-
-            Console.WriteLine($"Piece to move: {piece}");
-
-            if (!IsValidMove(piece, startX, startY, endX, endY))
-            {
-                Console.WriteLine("Move failed: Invalid move for the piece.");
-                return false;
-            }
-
-            // Simulate the move
-            string capturedPiece = Board[endX, endY];
-            Console.WriteLine($"Captured piece at destination: {capturedPiece}");
             Board[endX, endY] = piece;
             Board[startX, startY] = null;
 
-            // Update king position if moved
-            if (piece == "WKing") WhiteKingPosition = (endX, endY);
-            if (piece == "BKing") BlackKingPosition = (endX, endY);
-
-            // Check if the move leaves the king in check
-            var kingPosition = piece.StartsWith("W") ? WhiteKingPosition : BlackKingPosition;
-            if (IsKingInCheck(piece, kingPosition.x, kingPosition.y))
+            // Check for pawn promotion
+            if (piece == "WPawn" && endX == GridSize - 1) // White promotes at the bottom
             {
-                Console.WriteLine("Move failed: King would be in check.");
-                // Undo the move
-                Board[startX, startY] = piece;
-                Board[endX, endY] = capturedPiece;
-
-                if (piece == "WKing") WhiteKingPosition = (startX, startY);
-                if (piece == "BKing") BlackKingPosition = (startX, startY);
-
-                return false;
+                OnPawnPromotion?.Invoke("W", endX, endY);
+            }
+            else if (piece == "BPawn" && endX == 0) // Black promotes at the top
+            {
+                OnPawnPromotion?.Invoke("B", endX, endY);
             }
 
-            // Switch turns after a successful move
-            isWhiteTurn = !isWhiteTurn;
-
-            Console.WriteLine("Move successful.");
             return true;
         }
 
