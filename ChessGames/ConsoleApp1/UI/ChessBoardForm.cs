@@ -172,29 +172,48 @@ namespace ChessGames.UI
                 return;
             }
 
+            // If no tile is selected yet
             if (selectedTile == null)
             {
-                if (chessLogic.Board[row, col] != null)
+                if (chessLogic.Board[row, col] != null) // Ensure the tile has a piece
                 {
-                    selectedTile = (row, col);
+                    // Check if the piece belongs to the current player
+                    if ((isWhiteTurn && chessLogic.Board[row, col].StartsWith("W")) ||
+                        (!isWhiteTurn && chessLogic.Board[row, col].StartsWith("B")))
+                    {
+                        selectedTile = (row, col);
+                    }
+                    else
+                    {
+                        MessageBox.Show("It's not your turn!");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("No piece on the selected tile!");
                 }
             }
             else
             {
                 var (startRow, startCol) = selectedTile.Value;
 
-                if (startRow < 0 || startRow >= GridSize || startCol < 0 || startCol >= GridSize)
+                // Prevent capturing a piece of the same player
+                if (chessLogic.Board[row, col] != null &&
+                    ((isWhiteTurn && chessLogic.Board[row, col].StartsWith("W")) ||
+                     (!isWhiteTurn && chessLogic.Board[row, col].StartsWith("B"))))
                 {
-                    MessageBox.Show("Invalid starting position!");
-                    selectedTile = null;
+                    MessageBox.Show("You cannot capture your own piece!");
+                    selectedTile = null; // Reset the selection
                     return;
                 }
 
+                // Attempt to move the piece
                 if (chessLogic.MovePiece(startRow, startCol, row, col))
                 {
                     RenderPieces();
                     UpdateCapturedPieces();
 
+                    // Switch turns
                     isWhiteTurn = !isWhiteTurn;
                     if (isWhiteTurn)
                     {
@@ -211,7 +230,8 @@ namespace ChessGames.UI
                 {
                     MessageBox.Show("Invalid move!");
                 }
-                selectedTile = null;
+
+                selectedTile = null; // Reset the selection
             }
         }
 
@@ -223,17 +243,31 @@ namespace ChessGames.UI
                 {
                     string piece = chessLogic.Board[row, col];
 
-                    // Set the tile's background image to the piece image or the tile background
+                    // Set the tile's background image (white or black)
+                    tiles[row, col].BackgroundImage = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground;
+                    tiles[row, col].BackgroundImageLayout = ImageLayout.Stretch;
+
+                    // Clear any existing controls on the tile
+                    tiles[row, col].Controls.Clear();
+
+                    // Add the piece image as a foreground image if it exists
                     if (piece != null && pieceImages.ContainsKey(piece))
                     {
-                        tiles[row, col].BackgroundImage = pieceImages[piece];
-                    }
-                    else
-                    {
-                        tiles[row, col].BackgroundImage = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground;
-                    }
+                        PictureBox piecePictureBox = new PictureBox
+                        {
+                            Image = pieceImages[piece],
+                            SizeMode = PictureBoxSizeMode.StretchImage,
+                            Dock = DockStyle.Fill,
+                            BackColor = Color.Transparent // Ensure transparency
+                        };
 
-                    tiles[row, col].BackgroundImageLayout = ImageLayout.Stretch; // Ensure the image fits the tile
+                        // Capture the correct row and col values for the click event
+                        int capturedRow = row;
+                        int capturedCol = col;
+                        piecePictureBox.Click += (sender, e) => Tile_Click(capturedRow, capturedCol);
+
+                        tiles[row, col].Controls.Add(piecePictureBox);
+                    }
                 }
             }
         }

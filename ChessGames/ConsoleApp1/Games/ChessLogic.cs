@@ -8,6 +8,7 @@ namespace ConsoleApp1.Games
         private const int GridSize = 8;
         public (int x, int y) WhiteKingPosition { get; private set; }
         public (int x, int y) BlackKingPosition { get; private set; }
+        private bool isWhiteTurn = true; // Track whose turn it is (true = White's turn, false = Black's turn)
 
         public ChessLogic()
         {
@@ -56,6 +57,13 @@ namespace ConsoleApp1.Games
                 return false;
             }
 
+            // Check if it's the correct player's turn
+            if ((isWhiteTurn && !piece.StartsWith("W")) || (!isWhiteTurn && !piece.StartsWith("B")))
+            {
+                Console.WriteLine("Move failed: It's not your turn.");
+                return false;
+            }
+
             Console.WriteLine($"Piece to move: {piece}");
 
             if (!IsValidMove(piece, startX, startY, endX, endY))
@@ -88,6 +96,9 @@ namespace ConsoleApp1.Games
 
                 return false;
             }
+
+            // Switch turns after a successful move
+            isWhiteTurn = !isWhiteTurn;
 
             Console.WriteLine("Move successful.");
             return true;
