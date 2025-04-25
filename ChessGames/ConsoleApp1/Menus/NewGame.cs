@@ -66,6 +66,9 @@ _____________________________________________________________________
                 case 2:
                     Console.WriteLine("Returning to the main menu...");
                     break;
+                default:
+                    Console.WriteLine("Invalid selection. Returning to the main menu...");
+                    break;
             }
         }
     }

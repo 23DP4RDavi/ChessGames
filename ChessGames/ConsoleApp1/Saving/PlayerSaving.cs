@@ -8,7 +8,7 @@ namespace ConsoleApp1.Saving
     public class PlayerSaving
     {
         // Use an explicit absolute path for the Saves folder
-        private static readonly string FilePath = Path.Combine(@"..\..\..\Saving\Saves", "players.json");
+        private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saving", "Saves", "players.json");
         private List<Player> players;
 
         public PlayerSaving()
@@ -90,8 +90,15 @@ namespace ConsoleApp1.Saving
 
         private void SavePlayers()
         {
-            string json = JsonSerializer.Serialize(players, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(FilePath, json);
+            try
+            {
+                string json = JsonSerializer.Serialize(players, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while saving players: {ex.Message}");
+            }
         }
 
         private void EnsureSavesDirectoryExists()

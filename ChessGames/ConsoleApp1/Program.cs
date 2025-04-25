@@ -47,7 +47,7 @@ ___________________________________________________________________
                         HandleMenuSelection(selectedIndex);
                         break;
                 }
-            } while (key != ConsoleKey.Enter || selectedIndex != 3); // Fixed exit condition
+            } while (key != ConsoleKey.Enter || selectedIndex != 3);
         }
 
         static void HandleMenuSelection(int selectedIndex)
@@ -56,7 +56,7 @@ ___________________________________________________________________
             {
                 case 0:
                     Console.WriteLine("New Game selected...");
-                    // Implement NewGame.StartNewGame() or replace with actual logic
+                    NewGame.StartNewGame();
                     Console.WriteLine("Press any key to return to the main menu...");
                     Console.ReadKey();
                     break;
@@ -66,7 +66,7 @@ ___________________________________________________________________
                     Console.ReadKey();
                     break;
                 case 2:
-                    PlayersMenuHandler.ShowPlayersMenu(); // Fixed method call
+                    PlayersMenuHandler.ShowPlayersMenu();
                     break;
                 case 3:
                     Console.WriteLine("Exiting...");

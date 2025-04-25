@@ -49,11 +49,11 @@ namespace CheckersGames.UI
 
         private void LoadPieceImages()
         {
-            string imagePath = @"..\\..\\..\\UI\\Image\\Checkers\\";
+            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UI", "Image", "Checkers");
             try
             {
-                blackTileBackground = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
-                blackTileBackground = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
+                pieceImages["WhitePiece"] = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
+                pieceImages["BlackPiece"] = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace CheckersGames.UI
 
         private void Tile_Click(int row, int col)
         {
-            MessageBox.Show($"Tile clicked at row {row}, column {col}");
+            // Add logic to handle checkers game moves
         }
 
         private void RenderCheckersPieces()
