@@ -1,10 +1,13 @@
 using System;
+using ConsoleApp1.Menus.Players;
+using ConsoleApp1.Saving;
+using ConsoleApp1;
 
 namespace ConsoleApp1.Menus
 {
-    public class Players
+    public class PlayersMenuHandler
     {
-        public static void PlayersMenu()
+        public static void ShowPlayersMenu()
         {
             string[] MainMenu = { "See players", "Add player", "Go Back" };
             int selectedIndex = 0;
@@ -47,20 +50,21 @@ namespace ConsoleApp1.Menus
             switch (selectedIndex)
             {
                 case 0:
-                    Console.WriteLine("Displaying players...");
-                    // Add logic to display players
+                    Console.Clear();
+                    PlayerSaving playerSaving = new PlayerSaving();
+                    playerSaving.DisplayPlayers();
                     Console.WriteLine("Press any key to return to the menu...");
                     Console.ReadKey();
                     break;
                 case 1:
+                    Console.Clear();
                     Console.WriteLine("Add player selected...");
-                    // Add logic to add a player
+                    PlayerCreate.CreatePlayer();
                     Console.WriteLine("Press any key to return to the menu...");
                     Console.ReadKey();
                     break;
                 case 2:
                     Console.WriteLine("Returning to the main menu...");
-                    // No additional logic needed for "Go Back"
                     break;
             }
         }

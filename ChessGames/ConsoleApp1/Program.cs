@@ -40,7 +40,7 @@ namespace ConsoleApp1
                         HandleMenuSelection(selectedIndex);
                         break;
                 }
-            } while (key != ConsoleKey.Enter || selectedIndex != 2);
+            } while (key != ConsoleKey.Enter || selectedIndex != 3); // Fixed exit condition
         }
 
         static void HandleMenuSelection(int selectedIndex)
@@ -48,17 +48,18 @@ namespace ConsoleApp1
             switch (selectedIndex)
             {
                 case 0:
-                    NewGame.StartNewGame();
+                    Console.WriteLine("New Game selected...");
+                    // Implement NewGame.StartNewGame() or replace with actual logic
+                    Console.WriteLine("Press any key to return to the main menu...");
+                    Console.ReadKey();
                     break;
                 case 1:
-                    Console.WriteLine("Load Game selected");
-
-
+                    Console.WriteLine("Load Game selected...");
                     Console.WriteLine("Press any key to return to the main menu...");
                     Console.ReadKey();
                     break;
                 case 2:
-                    Players.PlayersMenu();
+                    PlayersMenuHandler.ShowPlayersMenu(); // Fixed method call
                     break;
                 case 3:
                     Console.WriteLine("Exiting...");
