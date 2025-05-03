@@ -7,8 +7,7 @@ namespace ConsoleApp1.Saving
 {
     public class PlayerSaving
     {
-        // Use an explicit absolute path for the Saves folder
-        private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saving", "Saves", "players.json");
+        private static readonly string FilePath = "../../../Saving/Saves/players.json";
         private List<Player> players;
 
         public PlayerSaving()

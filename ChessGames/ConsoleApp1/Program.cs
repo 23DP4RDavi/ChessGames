@@ -5,6 +5,7 @@ namespace ConsoleApp1
 {
     class Program
     {
+        [STAThread] // <-- THIS IS REQUIRED FOR WINFORMS TO WORK!
         static void Main(string[] args)
         {
             string[] MainMenu = { "New Game", "Load Game", "Players", "Exit" };
@@ -56,7 +57,7 @@ ___________________________________________________________________
             {
                 case 0:
                     Console.WriteLine("New Game selected...");
-                    NewGame.StartNewGame();
+                    GameOptions.ConfigureGame();
                     Console.WriteLine("Press any key to return to the main menu...");
                     Console.ReadKey();
                     break;

@@ -6,7 +6,7 @@ namespace ConsoleApp1.Games
     {
         private const int BoardSize = 8;
         private string[,] board;
-        private bool isWhiteTurn = true; // White starts first
+        private bool isWhiteTurn = true;
 
         public CheckersLogic()
         {
@@ -16,7 +16,6 @@ namespace ConsoleApp1.Games
         private void InitializeBoard()
         {
             board = new string[BoardSize, BoardSize];
-
             for (int row = 0; row < BoardSize; row++)
             {
                 for (int col = 0; col < BoardSize; col++)
@@ -30,41 +29,51 @@ namespace ConsoleApp1.Games
                         else
                             board[row, col] = null;
                     }
+                    else
+                    {
+                        board[row, col] = null;
+                    }
                 }
             }
         }
 
-        public string GetPiece(int row, int col)
-        {
-            if (!IsWithinBounds(row, col)) return null;
-            return board[row, col];
-        }
-
-        public void SetPiece(int row, int col, string piece)
-        {
-            if (IsWithinBounds(row, col))
-            {
-                board[row, col] = piece;
-            }
-        }
+        public string[,] Board => board;
 
         public bool MovePiece(int startRow, int startCol, int endRow, int endCol)
         {
             if (!IsValidMove(startRow, startCol, endRow, endCol))
                 return false;
 
-            board[endRow, endCol] = board[startRow, startCol];
+            string piece = board[startRow, startCol];
+
+            // Handle jump (capture)
+            if (Math.Abs(endRow - startRow) == 2)
+            {
+                int midRow = (startRow + endRow) / 2;
+                int midCol = (startCol + endCol) / 2;
+                board[midRow, midCol] = null; // Remove captured piece
+            }
+
+            board[endRow, endCol] = piece;
             board[startRow, startCol] = null;
 
-            // Toggle the turn after a successful move
-            isWhiteTurn = !isWhiteTurn;
+            // Promote to king
+            if (piece == "W" && endRow == 0)
+                board[endRow, endCol] = "WK";
+            else if (piece == "B" && endRow == BoardSize - 1)
+                board[endRow, endCol] = "BK";
 
+            isWhiteTurn = !isWhiteTurn;
             return true;
         }
 
         private bool IsValidMove(int startRow, int startCol, int endRow, int endCol)
         {
             if (!IsWithinBounds(startRow, startCol) || !IsWithinBounds(endRow, endCol))
+                return false;
+
+            // Only allow moves on black tiles
+            if ((endRow + endCol) % 2 == 0)
                 return false;
 
             string piece = board[startRow, startCol];
@@ -110,11 +119,6 @@ namespace ConsoleApp1.Games
         private bool IsWithinBounds(int row, int col)
         {
             return row >= 0 && row < BoardSize && col >= 0 && col < BoardSize;
-        }
-
-        public string[,] GetBoard()
-        {
-            return (string[,])board.Clone(); // optional helper
         }
     }
 }

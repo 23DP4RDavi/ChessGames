@@ -1,153 +1,236 @@
 using System;
+using System.Collections.Generic;
 
 namespace ConsoleApp1.Games
 {
     public class ChessLogic
     {
-        public string[,] Board { get; private set; }
+        private string[,] board;
+        public string[,] Board => board;
         private const int GridSize = 8;
         public (int x, int y) WhiteKingPosition { get; private set; }
         public (int x, int y) BlackKingPosition { get; private set; }
-        private bool isWhiteTurn = true; // Track whose turn it is (true = White's turn, false = Black's turn)
-        public event Action<string, int, int> OnPawnPromotion; // Event for pawn promotion
+        private bool isWhiteTurn = true;
+        public event Action<string, int, int> OnPawnPromotion;
+        private (int x, int y)? lastMove;
+
+        // Castling flags
+        private bool whiteKingMoved = false, blackKingMoved = false;
+        private bool whiteKingsideRookMoved = false, whiteQueensideRookMoved = false;
+        private bool blackKingsideRookMoved = false, blackQueensideRookMoved = false;
+
+        // Threefold repetition
+        private Dictionary<string, int> positionCounts = new Dictionary<string, int>();
 
         public ChessLogic()
         {
             InitializeBoard();
+            UpdatePositionCounts();
         }
 
         private void InitializeBoard()
         {
-            Board = new string[GridSize, GridSize];
-
-            // Place pawns
-            for (int i = 0; i < GridSize; i++)
-            {
-                Board[1, i] = "WPawn";
-                Board[6, i] = "BPawn";
-            }
-
-            // Place other pieces
-            string[] whitePieces = { "WRook", "WKnight", "WBishop", "WQueen", "WKing", "WBishop", "WKnight", "WRook" };
-            string[] blackPieces = { "BRook", "BKnight", "BBishop", "BQueen", "BKing", "BBishop", "BKnight", "BRook" };
+            board = new string[GridSize, GridSize];
 
             for (int i = 0; i < GridSize; i++)
             {
-                Board[0, i] = whitePieces[i];
-                Board[7, i] = blackPieces[i];
+                board[1, i] = "BPawn";
+                board[6, i] = "WPawn";
             }
 
-            WhiteKingPosition = (0, 4);
-            BlackKingPosition = (7, 4);
+            board[0, 0] = "BRook"; board[0, 7] = "BRook";
+            board[7, 0] = "WRook"; board[7, 7] = "WRook";
+            board[0, 1] = "BKnight"; board[0, 6] = "BKnight";
+            board[7, 1] = "WKnight"; board[7, 6] = "WKnight";
+            board[0, 2] = "BBishop"; board[0, 5] = "BBishop";
+            board[7, 2] = "WBishop"; board[7, 5] = "WBishop";
+            board[0, 3] = "BQueen"; board[7, 3] = "WQueen";
+            board[0, 4] = "BKing"; board[7, 4] = "WKing";
+
+            WhiteKingPosition = (7, 4);
+            BlackKingPosition = (0, 4);
+
+            whiteKingMoved = blackKingMoved = false;
+            whiteKingsideRookMoved = whiteQueensideRookMoved = false;
+            blackKingsideRookMoved = blackQueensideRookMoved = false;
+            positionCounts.Clear();
         }
 
         public bool MovePiece(int startX, int startY, int endX, int endY)
         {
-            // Validate the move
-            if (!IsValidMove(Board[startX, startY], startX, startY, endX, endY))
-            {
+            if (!IsValidMove(board[startX, startY], startX, startY, endX, endY))
                 return false;
-            }
 
-            // Perform the move
-            string piece = Board[startX, startY];
-            Board[endX, endY] = piece;
-            Board[startX, startY] = null;
+            string piece = board[startX, startY];
+            string captured = board[endX, endY];
 
-            // Check for pawn promotion
-            if (piece == "WPawn" && endX == GridSize - 1) // White promotes at the bottom
+            // Castling
+            if (piece == "WKing" && startX == 7 && startY == 4)
             {
-                OnPawnPromotion?.Invoke("W", endX, endY);
+                if (endX == 7 && endY == 6) // Kingside
+                {
+                    board[7, 5] = board[7, 7];
+                    board[7, 7] = null;
+                    whiteKingsideRookMoved = true;
+                }
+                else if (endX == 7 && endY == 2) // Queenside
+                {
+                    board[7, 3] = board[7, 0];
+                    board[7, 0] = null;
+                    whiteQueensideRookMoved = true;
+                }
+                whiteKingMoved = true;
             }
-            else if (piece == "BPawn" && endX == 0) // Black promotes at the top
+            else if (piece == "BKing" && startX == 0 && startY == 4)
             {
-                OnPawnPromotion?.Invoke("B", endX, endY);
+                if (endX == 0 && endY == 6) // Kingside
+                {
+                    board[0, 5] = board[0, 7];
+                    board[0, 7] = null;
+                    blackKingsideRookMoved = true;
+                }
+                else if (endX == 0 && endY == 2) // Queenside
+                {
+                    board[0, 3] = board[0, 0];
+                    board[0, 0] = null;
+                    blackQueensideRookMoved = true;
+                }
+                blackKingMoved = true;
             }
 
+            // Update rook moved flags
+            if (piece == "WRook")
+            {
+                if (startX == 7 && startY == 0) whiteQueensideRookMoved = true;
+                if (startX == 7 && startY == 7) whiteKingsideRookMoved = true;
+            }
+            if (piece == "BRook")
+            {
+                if (startX == 0 && startY == 0) blackQueensideRookMoved = true;
+                if (startX == 0 && startY == 7) blackKingsideRookMoved = true;
+            }
+
+            // En passant
+            if (piece.EndsWith("Pawn") && Math.Abs(endY - startY) == 1 && board[endX, endY] == null)
+            {
+                int direction = piece.StartsWith("W") ? 1 : -1;
+                board[endX + direction, endY] = null;
+            }
+
+            board[endX, endY] = piece;
+            board[startX, startY] = null;
+
+            if (piece == "WKing") WhiteKingPosition = (endX, endY);
+            if (piece == "BKing") BlackKingPosition = (endX, endY);
+
+            // Pawn promotion (auto-queen for UI, can be expanded for underpromotion)
+            if (piece.EndsWith("Pawn") && (endX == 0 || endX == 7))
+            {
+                board[endX, endY] = piece[0] + "Queen";
+                OnPawnPromotion?.Invoke(board[endX, endY], endX, endY);
+            }
+
+            lastMove = (endX, endY);
+            isWhiteTurn = !isWhiteTurn;
+            UpdatePositionCounts();
             return true;
         }
 
         private bool IsValidMove(string piece, int startX, int startY, int endX, int endY)
         {
-            Console.WriteLine($"Validating move for {piece} from ({startX}, {startY}) to ({endX}, {endY})");
+            if (piece == null) return false;
+            if (startX < 0 || startX >= GridSize || startY < 0 || startY >= GridSize ||
+                endX < 0 || endX >= GridSize || endY < 0 || endY >= GridSize)
+                return false;
+            if (isWhiteTurn && piece.StartsWith("B")) return false;
+            if (!isWhiteTurn && piece.StartsWith("W")) return false;
+            if (board[endX, endY] != null && board[endX, endY].StartsWith(piece[0].ToString()))
+                return false;
 
-            int direction = piece.StartsWith("W") ? 1 : -1; // White moves down, Black moves up
-
-            if (piece.Contains("Pawn"))
+            string pieceType = piece.Substring(1);
+            switch (pieceType)
             {
-                return IsValidPawnMove(piece, startX, startY, endX, endY, direction);
+                case "Pawn": return IsValidPawnMove(piece, startX, startY, endX, endY);
+                case "Rook": return IsValidRookMove(startX, startY, endX, endY);
+                case "Knight": return IsValidKnightMove(startX, startY, endX, endY);
+                case "Bishop": return IsValidBishopMove(startX, startY, endX, endY);
+                case "Queen": return IsValidQueenMove(startX, startY, endX, endY);
+                case "King": return IsValidKingMove(startX, startY, endX, endY);
+                default: return false;
             }
-
-            if (piece.Contains("Rook"))
-            {
-                return IsValidRookMove(startX, startY, endX, endY);
-            }
-
-            if (piece.Contains("Bishop"))
-            {
-                return IsValidBishopMove(startX, startY, endX, endY);
-            }
-
-            if (piece.Contains("Queen"))
-            {
-                return IsValidQueenMove(startX, startY, endX, endY);
-            }
-
-            if (piece.Contains("King"))
-            {
-                return IsValidKingMove(startX, startY, endX, endY);
-            }
-
-            if (piece.Contains("Knight"))
-            {
-                return IsValidKnightMove(startX, startY, endX, endY);
-            }
-
-            Console.WriteLine("Invalid move: Unknown piece.");
-            return false;
         }
 
-        private bool IsValidPawnMove(string piece, int startX, int startY, int endX, int endY, int direction)
+        private bool IsValidPawnMove(string piece, int startX, int startY, int endX, int endY)
         {
-            // Forward movement
-            if (startY == endY && Board[endX, endY] == null)
-            {
-                // Single step
-                if (endX == startX + direction) return true;
+            int direction = piece.StartsWith("W") ? -1 : 1;
+            int startRow = piece.StartsWith("W") ? 6 : 1;
 
-                // Double step (only from starting position)
-                if ((piece.StartsWith("W") && startX == 1 || piece.StartsWith("B") && startX == 6) &&
-                    endX == startX + 2 * direction && Board[startX + direction, startY] == null)
-                {
+            // Move forward
+            if (startY == endY && board[endX, endY] == null)
+            {
+                if (endX == startX + direction) return true;
+                if (endX == startX + 2 * direction && startX == startRow && board[startX + direction, startY] == null)
                     return true;
+            }
+
+            // Capture
+            if (Math.Abs(endY - startY) == 1 && endX == startX + direction)
+            {
+                if (board[endX, endY] != null) return true;
+
+                // En passant
+                if (lastMove.HasValue)
+                {
+                    var (lastX, lastY) = lastMove.Value;
+                    if (board[startX, endY] != null &&
+                        board[startX, endY] == (piece.StartsWith("W") ? "BPawn" : "WPawn") &&
+                        lastX == startX && lastY == endY &&
+                        Math.Abs(lastX - endX) == 1)
+                    {
+                        return true;
+                    }
                 }
             }
-
-            // Diagonal capture
-            if (Math.Abs(startY - endY) == 1 && endX == startX + direction && Board[endX, endY] != null)
-            {
-                return true;
-            }
-
             return false;
         }
 
         private bool IsValidRookMove(int startX, int startY, int endX, int endY)
         {
-            if (startX == endX || startY == endY)
+            if (startX != endX && startY != endY) return false;
+            if (startX == endX)
             {
-                return IsPathClear(startX, startY, endX, endY);
+                int step = startY < endY ? 1 : -1;
+                for (int y = startY + step; y != endY; y += step)
+                    if (board[startX, y] != null) return false;
             }
-            return false;
+            else
+            {
+                int step = startX < endX ? 1 : -1;
+                for (int x = startX + step; x != endX; x += step)
+                    if (board[x, startY] != null) return false;
+            }
+            return true;
+        }
+
+        private bool IsValidKnightMove(int startX, int startY, int endX, int endY)
+        {
+            int dx = Math.Abs(endX - startX);
+            int dy = Math.Abs(endY - startY);
+            return (dx == 2 && dy == 1) || (dx == 1 && dy == 2);
         }
 
         private bool IsValidBishopMove(int startX, int startY, int endX, int endY)
         {
-            if (Math.Abs(startX - endX) == Math.Abs(startY - endY))
+            if (Math.Abs(endX - startX) != Math.Abs(endY - startY)) return false;
+            int stepX = endX > startX ? 1 : -1;
+            int stepY = endY > startY ? 1 : -1;
+            int x = startX + stepX, y = startY + stepY;
+            while (x != endX && y != endY)
             {
-                return IsPathClear(startX, startY, endX, endY);
+                if (board[x, y] != null) return false;
+                x += stepX; y += stepY;
             }
-            return false;
+            return true;
         }
 
         private bool IsValidQueenMove(int startX, int startY, int endX, int endY)
@@ -157,62 +240,117 @@ namespace ConsoleApp1.Games
 
         private bool IsValidKingMove(int startX, int startY, int endX, int endY)
         {
-            return Math.Abs(startX - endX) <= 1 && Math.Abs(startY - endY) <= 1;
-        }
+            int dx = Math.Abs(endX - startX);
+            int dy = Math.Abs(endY - startY);
+            if (dx <= 1 && dy <= 1) return true;
 
-        private bool IsValidKnightMove(int startX, int startY, int endX, int endY)
-        {
-            return (Math.Abs(startX - endX) == 2 && Math.Abs(startY - endY) == 1) ||
-                   (Math.Abs(startX - endX) == 1 && Math.Abs(startY - endY) == 2);
-        }
-
-        private bool IsPathClear(int startX, int startY, int endX, int endY)
-        {
-            int deltaX = Math.Sign(endX - startX);
-            int deltaY = Math.Sign(endY - startY);
-
-            int currentX = startX + deltaX;
-            int currentY = startY + deltaY;
-
-            while (currentX != endX || currentY != endY)
+            // Castling
+            if (startX == endX && dx == 0 && dy == 2)
             {
-                if (Board[currentX, currentY] != null)
+                bool isWhite = isWhiteTurn;
+                if (isWhite)
                 {
-                    return false;
+                    if (whiteKingMoved) return false;
+                    // Kingside
+                    if (endY == 6 && !whiteKingsideRookMoved &&
+                        board[7, 5] == null && board[7, 6] == null &&
+                        board[7, 7] == "WRook" && !IsInCheck(true) &&
+                        !WouldBeInCheck(7, 4, 7, 5) && !WouldBeInCheck(7, 4, 7, 6))
+                        return true;
+                    // Queenside
+                    if (endY == 2 && !whiteQueensideRookMoved &&
+                        board[7, 1] == null && board[7, 2] == null && board[7, 3] == null &&
+                        board[7, 0] == "WRook" && !IsInCheck(true) &&
+                        !WouldBeInCheck(7, 4, 7, 3) && !WouldBeInCheck(7, 4, 7, 2))
+                        return true;
                 }
-
-                currentX += deltaX;
-                currentY += deltaY;
+                else
+                {
+                    if (blackKingMoved) return false;
+                    // Kingside
+                    if (endY == 6 && !blackKingsideRookMoved &&
+                        board[0, 5] == null && board[0, 6] == null &&
+                        board[0, 7] == "BRook" && !IsInCheck(false) &&
+                        !WouldBeInCheck(0, 4, 0, 5) && !WouldBeInCheck(0, 4, 0, 6))
+                        return true;
+                    // Queenside
+                    if (endY == 2 && !blackQueensideRookMoved &&
+                        board[0, 1] == null && board[0, 2] == null && board[0, 3] == null &&
+                        board[0, 0] == "BRook" && !IsInCheck(false) &&
+                        !WouldBeInCheck(0, 4, 0, 3) && !WouldBeInCheck(0, 4, 0, 2))
+                        return true;
+                }
             }
+            return false;
+        }
 
+        // --- Special rules and helpers ---
+
+        private bool IsInCheck(bool white)
+        {
+            var king = white ? "WKing" : "BKing";
+            var pos = white ? WhiteKingPosition : BlackKingPosition;
+            for (int x = 0; x < GridSize; x++)
+                for (int y = 0; y < GridSize; y++)
+                    if (board[x, y] != null && board[x, y][0] != king[0])
+                        if (IsValidMove(board[x, y], x, y, pos.x, pos.y))
+                            return true;
+            return false;
+        }
+
+        private bool WouldBeInCheck(int kingX, int kingY, int newX, int newY)
+        {
+            string temp = board[newX, newY];
+            board[newX, newY] = board[kingX, kingY];
+            board[kingX, kingY] = null;
+            var king = board[newX, newY];
+            var pos = (newX, newY);
+            bool inCheck = false;
+            for (int x = 0; x < GridSize; x++)
+                for (int y = 0; y < GridSize; y++)
+                    if (board[x, y] != null && board[x, y][0] != king[0])
+                        if (IsValidMove(board[x, y], x, y, pos.Item1, pos.Item2))
+                            inCheck = true;
+            board[kingX, kingY] = board[newX, newY];
+            board[newX, newY] = temp;
+            return inCheck;
+        }
+
+        public bool IsStalemate()
+        {
+            if (IsInCheck(isWhiteTurn)) return false;
+            for (int x = 0; x < GridSize; x++)
+                for (int y = 0; y < GridSize; y++)
+                    if (board[x, y] != null && ((isWhiteTurn && board[x, y].StartsWith("W")) || (!isWhiteTurn && board[x, y].StartsWith("B"))))
+                        for (int i = 0; i < GridSize; i++)
+                            for (int j = 0; j < GridSize; j++)
+                                if (IsValidMove(board[x, y], x, y, i, j))
+                                    return false;
             return true;
         }
 
-        private bool IsKingInCheck(string king, int kingX, int kingY)
+        private string GetBoardKey()
         {
-            string opponentPrefix = king.StartsWith("W") ? "B" : "W";
-
+            var key = "";
             for (int x = 0; x < GridSize; x++)
-            {
                 for (int y = 0; y < GridSize; y++)
-                {
-                    string piece = Board[x, y];
-                    if (piece != null && piece.StartsWith(opponentPrefix))
-                    {
-                        if (IsValidMove(piece, x, y, kingX, kingY))
-                        {
-                            return true; // King is in check
-                        }
-                    }
-                }
-            }
-
-            return false; // King is safe
+                    key += board[x, y] ?? ".";
+            key += isWhiteTurn ? "W" : "B";
+            return key;
         }
 
-        private bool IsWithinBounds(int x, int y)
+        private void UpdatePositionCounts()
         {
-            return x >= 0 && x < GridSize && y >= 0 && y < GridSize;
+            var key = GetBoardKey();
+            if (!positionCounts.ContainsKey(key))
+                positionCounts[key] = 0;
+            positionCounts[key]++;
+        }
+
+        public bool IsThreefoldRepetition()
+        {
+            var key = GetBoardKey();
+            return positionCounts.ContainsKey(key) && positionCounts[key] >= 3;
         }
     }
 }
