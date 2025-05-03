@@ -1,36 +1,101 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Collections.Generic;
 using System.Windows.Forms;
 using ConsoleApp1.Games;
 
-namespace CheckersGames.UI
+namespace CheckersGame.UI
 {
     public class CheckersBoardForm : Form
     {
         private const int TileSize = 60;
         private const int GridSize = 8;
         private Panel[,] tiles = new Panel[GridSize, GridSize];
+        private CheckersLogic checkersLogic;
         private Dictionary<string, Image> pieceImages;
         private Image whiteTileBackground;
         private Image blackTileBackground;
+        private (int row, int col)? selectedTile = null;
+        private Label player1Label;
+        private Label player2Label;
+        private Label whiteTimerLabel;
+        private Label blackTimerLabel;
+        private Panel capturedWhitePanel;
+        private Panel capturedBlackPanel;
+        private List<string> capturedWhitePieces = new List<string>();
+        private List<string> capturedBlackPieces = new List<string>();
+        private bool isWhiteTurn = true;
+        private int whiteTimeRemaining = 600000; // 10 minutes in milliseconds
+        private int blackTimeRemaining = 600000; // 10 minutes in milliseconds
+        private Timer whiteTimer;
+        private Timer blackTimer;
 
         public CheckersBoardForm()
         {
-            pieceImages = new Dictionary<string, Image>();
             InitializeComponent();
-            LoadTileBackgrounds();
-            LoadPieceImages();
-            CreateCheckersBoard();
-            RenderCheckersPieces();
+            InitializeGame();
         }
 
         private void InitializeComponent()
         {
-            this.Text = "Checkers Board";
+            this.Text = "Checkers Game";
+            this.Size = new Size(TileSize * GridSize + 300, TileSize * GridSize + 100);
             this.BackColor = Color.Black;
-            this.Size = new Size(TileSize * GridSize + 16, TileSize * GridSize + 39);
+
+            // Player labels
+            player1Label = CreateLabel("White Player", new Point(TileSize * GridSize + 20, 10));
+            player2Label = CreateLabel("Black Player", new Point(TileSize * GridSize + 20, 200));
+
+            // Timers
+            whiteTimerLabel = CreateLabel("10:00:000", new Point(TileSize * GridSize + 20, 50));
+            blackTimerLabel = CreateLabel("10:00:000", new Point(TileSize * GridSize + 20, 240));
+
+            this.Controls.Add(player1Label);
+            this.Controls.Add(player2Label);
+            this.Controls.Add(whiteTimerLabel);
+            this.Controls.Add(blackTimerLabel);
+
+            // Captured pieces panels
+            capturedWhitePanel = CreateCapturedPanel(new Point(TileSize * GridSize + 20, 100));
+            capturedBlackPanel = CreateCapturedPanel(new Point(TileSize * GridSize + 20, 290));
+
+            this.Controls.Add(capturedWhitePanel);
+            this.Controls.Add(capturedBlackPanel);
+        }
+
+        private void InitializeGame()
+        {
+            checkersLogic = new CheckersLogic();
+            pieceImages = new Dictionary<string, Image>();
+            LoadTileBackgrounds();
+            LoadPieceImages();
+            CreateCheckersBoard();
+            RenderPieces();
+            InitializeTimers();
+        }
+
+        private Label CreateLabel(string text, Point location)
+        {
+            return new Label
+            {
+                Text = text,
+                Font = new Font("Arial", 16, FontStyle.Bold),
+                ForeColor = Color.White,
+                BackColor = Color.Transparent, 
+                Location = location,
+                AutoSize = true
+            };
+        }
+
+        private Panel CreateCapturedPanel(Point location)
+        {
+            return new Panel
+            {
+                Location = location,
+                Size = new Size(150, 100),
+                BorderStyle = BorderStyle.FixedSingle
+            };
         }
 
         private void LoadTileBackgrounds()
@@ -49,11 +114,13 @@ namespace CheckersGames.UI
 
         private void LoadPieceImages()
         {
-            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UI", "Image", "Checkers");
+            string imagePath = @"..\\..\\..\\UI\\Image\\Checkers\\";
             try
             {
-                pieceImages["WhitePiece"] = Image.FromFile(Path.Combine(imagePath, "w_puck.png"));
-                pieceImages["BlackPiece"] = Image.FromFile(Path.Combine(imagePath, "b_puck.png"));
+                pieceImages["WPawn"] = Image.FromFile(Path.Combine(imagePath, "w_pawn.png"));
+                pieceImages["BPawn"] = Image.FromFile(Path.Combine(imagePath, "b_pawn.png"));
+                pieceImages["WKing"] = Image.FromFile(Path.Combine(imagePath, "w_king.png"));
+                pieceImages["BKing"] = Image.FromFile(Path.Combine(imagePath, "b_king.png"));
             }
             catch (Exception ex)
             {
@@ -67,89 +134,186 @@ namespace CheckersGames.UI
             {
                 for (int col = 0; col < GridSize; col++)
                 {
-                    Panel tile = CreateTile(row, col);
+                    Panel tile = new Panel
+                    {
+                        Size = new Size(TileSize, TileSize),
+                        Location = new Point(col * TileSize, row * TileSize),
+                        BackgroundImage = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground,
+                        BackgroundImageLayout = ImageLayout.Stretch
+                    };
+
+                    int capturedRow = row;
+                    int capturedCol = col;
+                    tile.Click += (sender, e) => Tile_Click(capturedRow, capturedCol);
+
                     tiles[row, col] = tile;
                     this.Controls.Add(tile);
                 }
             }
         }
 
-        private Panel CreateTile(int row, int col)
-        {
-            Panel tile = new Panel
-            {
-                Size = new Size(TileSize, TileSize),
-                Location = new Point(col * TileSize, row * TileSize),
-                BackgroundImage = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground,
-                BackgroundImageLayout = ImageLayout.Stretch
-            };
-            tile.Click += (sender, e) => Tile_Click(row, col);
-            return tile;
-        }
-
         private void Tile_Click(int row, int col)
         {
-            // Add logic to handle checkers game moves
+            if (row < 0 || row >= GridSize || col < 0 || col >= GridSize)
+            {
+                MessageBox.Show("Invalid tile selected!");
+                return;
+            }
+
+            // If no tile is selected yet
+            if (selectedTile == null)
+            {
+                if (checkersLogic.GetPiece(row, col) != null) // Ensure the tile has a piece
+                {
+                    if ((isWhiteTurn && checkersLogic.GetPiece(row, col).StartsWith("W")) ||
+                        (!isWhiteTurn && checkersLogic.GetPiece(row, col).StartsWith("B")))
+                    {
+                        selectedTile = (row, col);
+                    }
+                    else
+                    {
+                        MessageBox.Show("It's not your turn!");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("No piece on the selected tile!");
+                }
+            }
+            else
+            {
+                var (startRow, startCol) = selectedTile.Value;
+
+                // Prevent capturing a piece of the same player
+                if (checkersLogic.GetPiece(row, col) != null &&
+                    ((isWhiteTurn && checkersLogic.GetPiece(row, col).StartsWith("W")) ||
+                     (!isWhiteTurn && checkersLogic.GetPiece(row, col).StartsWith("B"))))
+                {
+                    MessageBox.Show("You cannot capture your own piece!");
+                    selectedTile = null;
+                    return;
+                }
+
+                // Attempt to move the piece
+                if (checkersLogic.MovePiece(startRow, startCol, row, col))
+                {
+                    RenderPieces();
+                    UpdateCapturedPieces();
+
+                    // Switch turns
+                    isWhiteTurn = !isWhiteTurn;
+                    if (isWhiteTurn)
+                    {
+                        blackTimer.Stop();
+                        whiteTimer.Start();
+                    }
+                    else
+                    {
+                        whiteTimer.Stop();
+                        blackTimer.Start();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Invalid move!");
+                }
+
+                selectedTile = null; // Reset the selection
+            }
         }
 
-        private void RenderCheckersPieces()
+        private void RenderPieces()
         {
             for (int row = 0; row < GridSize; row++)
             {
                 for (int col = 0; col < GridSize; col++)
                 {
-                    Image tileBackground = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground;
+                    string piece = checkersLogic.GetPiece(row, col);
 
-                    // Determine if a piece should be placed on this tile
-                    string piece = GetCheckersPiece(row, col);
+                    // Set the tile's background image (white or black)
+                    tiles[row, col].BackgroundImage = (row + col) % 2 == 0 ? whiteTileBackground : blackTileBackground;
+                    tiles[row, col].BackgroundImageLayout = ImageLayout.Stretch;
+
+                    // Clear any existing controls on the tile
+                    tiles[row, col].Controls.Clear();
+
+                    // Add the piece image as a foreground image if it exists
                     if (piece != null && pieceImages.ContainsKey(piece))
                     {
-                        Bitmap combinedImage = new Bitmap(TileSize, TileSize);
-                        using (Graphics g = Graphics.FromImage(combinedImage))
+                        PictureBox piecePictureBox = new PictureBox
                         {
-                            // Draw the tile background
-                            g.DrawImage(tileBackground, 0, 0, TileSize, TileSize);
+                            Image = pieceImages[piece],
+                            SizeMode = PictureBoxSizeMode.StretchImage,
+                            Dock = DockStyle.Fill,
+                            BackColor = Color.Transparent
+                        };
 
-                            // Calculate the size and position to center the piece image
-                            Image pieceImage = pieceImages[piece];
-                            int pieceWidth = pieceImage.Width;
-                            int pieceHeight = pieceImage.Height;
+                        // Capture the correct row and col values for the click event
+                        int capturedRow = row;
+                        int capturedCol = col;
+                        piecePictureBox.Click += (sender, e) => Tile_Click(capturedRow, capturedCol);
 
-                            // Maintain aspect ratio
-                            float scale = Math.Min((float)TileSize / pieceWidth, (float)TileSize / pieceHeight);
-                            int scaledWidth = (int)(pieceWidth * scale);
-                            int scaledHeight = (int)(pieceHeight * scale);
-
-                            int offsetX = (TileSize - scaledWidth) / 2;
-                            int offsetY = (TileSize - scaledHeight) / 2;
-
-                            // Draw the piece image centered
-                            g.DrawImage(pieceImage, offsetX, offsetY, scaledWidth, scaledHeight);
-                        }
-
-                        tiles[row, col].BackgroundImage = combinedImage;
+                        tiles[row, col].Controls.Add(piecePictureBox);
                     }
-                    else
-                    {
-                        tiles[row, col].BackgroundImage = tileBackground;
-                    }
-
-                    tiles[row, col].BackgroundImageLayout = ImageLayout.None; // Prevent stretching
                 }
             }
         }
 
-        private string GetCheckersPiece(int row, int col)
+        private void UpdateCapturedPieces()
         {
-            if (row < 3 && (row + col) % 2 != 0)
+            capturedWhitePanel.Controls.Clear();
+            capturedBlackPanel.Controls.Clear();
+
+            foreach (string piece in capturedWhitePieces)
             {
-                return "BlackPiece";
+                capturedWhitePanel.Controls.Add(new Label { Text = piece, AutoSize = true });
             }
-            else if (row > 4 && (row + col) % 2 != 0)
+
+            foreach (string piece in capturedBlackPieces)
             {
-                return "WhitePiece";
+                capturedBlackPanel.Controls.Add(new Label { Text = piece, AutoSize = true });
             }
-            return null;
+        }
+
+        private void InitializeTimers()
+        {
+            whiteTimer = new Timer { Interval = 1 };
+            blackTimer = new Timer { Interval = 1 };
+
+            whiteTimer.Tick += (sender, e) =>
+            {
+                whiteTimeRemaining -= 1;
+                UpdateTimerLabel(whiteTimerLabel, whiteTimeRemaining);
+
+                if (whiteTimeRemaining <= 0)
+                {
+                    whiteTimer.Stop();
+                    MessageBox.Show("White ran out of time! Black wins!");
+                }
+            };
+
+            blackTimer.Tick += (sender, e) =>
+            {
+                blackTimeRemaining -= 1;
+                UpdateTimerLabel(blackTimerLabel, blackTimeRemaining);
+
+                if (blackTimeRemaining <= 0)
+                {
+                    blackTimer.Stop();
+                    MessageBox.Show("Black ran out of time! White wins!");
+                }
+            };
+
+            whiteTimer.Start(); // White starts first
+        }
+
+        private void UpdateTimerLabel(Label timerLabel, int timeRemaining)
+        {
+            int minutes = timeRemaining / 60000;
+            int seconds = (timeRemaining % 60000) / 1000;
+            int milliseconds = timeRemaining % 1000;
+
+            timerLabel.Text = $"{minutes:D2}:{seconds:D2}:{milliseconds:D3}";
         }
     }
 }
