@@ -46,7 +46,7 @@ namespace ChessGames.UI
             int padding = 20;
             int totalWidth = hudWidth * 2 + boardWidth + padding * 2;
 
-            this.Text = "Board Game";
+            this.Text = "ChessGames - Game Board";
             this.Size = new Size(totalWidth + 40, TileSize * GridSize + 80);
             this.BackColor = Color.Black;
 
@@ -259,8 +259,6 @@ namespace ChessGames.UI
 
         private void Tile_Click(int row, int col)
         {
-            Console.WriteLine($"Tile clicked: Row={row}, Col={col}");
-
             if (selectedTile == null)
             {
                 string piece = GetPieceAt(row, col);
