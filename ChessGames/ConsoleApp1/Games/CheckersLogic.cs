@@ -8,6 +8,10 @@ namespace ConsoleApp1.Games
         private string[,] board;
         private bool isWhiteTurn = true;
 
+        // For chain jumps
+        public bool MustContinueJump { get; private set; } = false;
+        public (int row, int col)? JumpingPiece { get; private set; } = null;
+
         public CheckersLogic()
         {
             InitializeBoard();
@@ -47,7 +51,8 @@ namespace ConsoleApp1.Games
             string piece = board[startRow, startCol];
 
             // Handle jump (capture)
-            if (Math.Abs(endRow - startRow) == 2)
+            bool wasJump = Math.Abs(endRow - startRow) == 2;
+            if (wasJump)
             {
                 int midRow = (startRow + endRow) / 2;
                 int midCol = (startCol + endCol) / 2;
@@ -63,8 +68,37 @@ namespace ConsoleApp1.Games
             else if (piece == "B" && endRow == BoardSize - 1)
                 board[endRow, endCol] = "BK";
 
-            isWhiteTurn = !isWhiteTurn;
+            // Chain jump logic
+            if (wasJump && CanJumpAgain(endRow, endCol))
+            {
+                MustContinueJump = true;
+                JumpingPiece = (endRow, endCol);
+            }
+            else
+            {
+                MustContinueJump = false;
+                JumpingPiece = null;
+                isWhiteTurn = !isWhiteTurn;
+            }
+
             return true;
+        }
+
+        private bool CanJumpAgain(int row, int col)
+        {
+            string piece = board[row, col];
+            if (piece == null) return false;
+            int[] dr = { -2, -2, 2, 2 };
+            int[] dc = { -2, 2, -2, 2 };
+
+            for (int i = 0; i < 4; i++)
+            {
+                int newRow = row + dr[i];
+                int newCol = col + dc[i];
+                if (IsValidMove(row, col, newRow, newCol))
+                    return true;
+            }
+            return false;
         }
 
         private bool IsValidMove(int startRow, int startCol, int endRow, int endCol)
@@ -80,6 +114,10 @@ namespace ConsoleApp1.Games
             if (piece == null || board[endRow, endCol] != null)
                 return false;
 
+            // If chain jump is required, only allow moves for that piece
+            if (MustContinueJump && JumpingPiece != null && (startRow != JumpingPiece.Value.row || startCol != JumpingPiece.Value.col))
+                return false;
+
             int rowDiff = endRow - startRow;
             int colDiff = Math.Abs(endCol - startCol);
             bool isKing = piece == "WK" || piece == "BK";
@@ -90,6 +128,7 @@ namespace ConsoleApp1.Games
             // Regular move
             if (Math.Abs(rowDiff) == 1)
             {
+                if (MustContinueJump) return false; // Can't make a regular move if must continue jumping
                 if (!isKing)
                 {
                     if (piece == "W" && rowDiff >= 0) return false;
@@ -120,5 +159,7 @@ namespace ConsoleApp1.Games
         {
             return row >= 0 && row < BoardSize && col >= 0 && col < BoardSize;
         }
+
+        public bool IsWhiteTurn => isWhiteTurn;
     }
 }

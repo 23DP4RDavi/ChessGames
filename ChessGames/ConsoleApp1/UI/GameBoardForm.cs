@@ -299,15 +299,10 @@ namespace ChessGames.UI
 
                 if (moved)
                 {
-                    // Track captured pieces
-                    if (!string.IsNullOrEmpty(capturedPiece))
-                    {
-                        if (isWhiteTurn)
-                            blackCaptured.Add(capturedPiece);
-                        else
-                            whiteCaptured.Add(capturedPiece);
-                        UpdateCapturedPanels();
-                    }
+                    // For Chess, check for promotion
+                    if (gameLogic is ChessLogic)
+                        HandlePawnPromotion(row, col);
+
                     RenderPieces();
                     isWhiteTurn = !isWhiteTurn;
                 }
@@ -394,6 +389,61 @@ namespace ChessGames.UI
                         tiles[row, col].Controls.Add(piecePictureBox);
                     }
                 }
+            }
+        }
+
+        private void HandlePawnPromotion(int row, int col)
+        {
+            if (gameLogic is ChessLogic chessLogic)
+            {
+                string piece = chessLogic.Board[row, col];
+                if ((piece == "WPawn" && row == 0) || (piece == "BPawn" && row == 7))
+                {
+                    bool isWhite = piece.StartsWith("W");
+                    using (var dialog = new PromotionDialog(isWhite))
+                    {
+                        if (dialog.ShowDialog(this) == DialogResult.OK)
+                        {
+                            chessLogic.Board[row, col] = dialog.SelectedPiece;
+                            RenderPieces();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class PromotionDialog : Form
+    {
+        public string SelectedPiece { get; private set; }
+
+        public PromotionDialog(bool isWhite)
+        {
+            this.Text = "Pawn Promotion";
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.Width = 340;
+            this.Height = 120;
+
+            var pieces = new[] { "Queen", "Rook", "Bishop", "Knight" };
+            for (int i = 0; i < pieces.Length; i++)
+            {
+                var btn = new Button
+                {
+                    Text = pieces[i],
+                    Tag = pieces[i],
+                    Width = 75,
+                    Height = 40,
+                    Left = 10 + i * 80,
+                    Top = 20
+                };
+                btn.Click += (s, e) =>
+                {
+                    SelectedPiece = (isWhite ? "W" : "B") + (string)btn.Tag;
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                };
+                this.Controls.Add(btn);
             }
         }
     }

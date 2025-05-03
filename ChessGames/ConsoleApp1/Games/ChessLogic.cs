@@ -11,7 +11,6 @@ namespace ConsoleApp1.Games
         public (int x, int y) WhiteKingPosition { get; private set; }
         public (int x, int y) BlackKingPosition { get; private set; }
         private bool isWhiteTurn = true;
-        public event Action<string, int, int> OnPawnPromotion;
         private (int x, int y)? lastMove;
 
         // Castling flags
@@ -122,13 +121,6 @@ namespace ConsoleApp1.Games
 
             if (piece == "WKing") WhiteKingPosition = (endX, endY);
             if (piece == "BKing") BlackKingPosition = (endX, endY);
-
-            // Pawn promotion (auto-queen for UI, can be expanded for underpromotion)
-            if (piece.EndsWith("Pawn") && (endX == 0 || endX == 7))
-            {
-                board[endX, endY] = piece[0] + "Queen";
-                OnPawnPromotion?.Invoke(board[endX, endY], endX, endY);
-            }
 
             lastMove = (endX, endY);
             isWhiteTurn = !isWhiteTurn;
