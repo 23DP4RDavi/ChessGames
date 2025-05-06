@@ -55,7 +55,7 @@ namespace ChessGames.UI
             {
                 Text = whitePlayerName,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Font = new Font("Comic Sans MS", 12, FontStyle.Bold),
                 Location = new Point(padding, 60),
                 AutoSize = true
             };
@@ -63,7 +63,7 @@ namespace ChessGames.UI
             {
                 Text = FormatTime(whiteTime),
                 ForeColor = Color.LightGreen,
-                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                Font = new Font("Comic Sans MS", 14, FontStyle.Bold),
                 Location = new Point(padding, 100),
                 AutoSize = true
             };
@@ -81,7 +81,7 @@ namespace ChessGames.UI
             {
                 Text = blackPlayerName,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Font = new Font("Comic Sans MS", 12, FontStyle.Bold),
                 Location = new Point(rightHudX, 60),
                 AutoSize = true
             };
@@ -89,7 +89,7 @@ namespace ChessGames.UI
             {
                 Text = FormatTime(blackTime),
                 ForeColor = Color.LightGreen,
-                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                Font = new Font("Comic Sans MS", 14, FontStyle.Bold),
                 Location = new Point(rightHudX, 100),
                 AutoSize = true
             };
@@ -170,6 +170,7 @@ namespace ChessGames.UI
                     pnlBlackCaptured.Controls.Add(new PictureBox { Image = pieceImages[piece], SizeMode = PictureBoxSizeMode.StretchImage, Size = new Size(28, 28), Margin = new Padding(2), Enabled = false });
         }
 
+        // Load images for tile backgrounds and pieces
         private void LoadTileBackgrounds()
         {
             string imagePath = @"..\\..\\..\\UI\\Image\\";
@@ -180,7 +181,7 @@ namespace ChessGames.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading tile backgrounds: {ex.Message}");
+                MessageBox.Show($"Error loading tile backgrounds: {ex.Message}"); // Handle error
             }
         }
 
@@ -216,9 +217,10 @@ namespace ChessGames.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading piece images: {ex.Message}");
+                MessageBox.Show($"Error loading piece images: {ex.Message}"); // Handle error
             }
         }
+
 
         private void CreateGameBoard()
         {
@@ -415,6 +417,7 @@ namespace ChessGames.UI
     {
         public string SelectedPiece { get; private set; }
 
+        // Pawn promotion dialog
         public PromotionDialog(bool isWhite)
         {
             this.Text = "Pawn Promotion";
