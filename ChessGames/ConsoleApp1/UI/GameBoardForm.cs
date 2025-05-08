@@ -318,6 +318,17 @@ namespace ChessGames.UI
                         var playerSaving = new PlayerSaving();
                         playerSaving.RecordWin(winner, "chess");
 
+                        try
+                        {
+                            string savePath = "../../../Saving/Saves/game.json";
+                            if (System.IO.File.Exists(savePath))
+                                System.IO.File.Delete(savePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Could not delete game save: " + ex.Message);
+                        }
+
                         this.Close();
                         return;
                     }
@@ -334,6 +345,17 @@ namespace ChessGames.UI
                             // Record win in JSON
                             var playerSaving = new PlayerSaving();
                             playerSaving.RecordWin(winnerName, "checkers");
+
+                            try
+                            {
+                                string savePath = "../../../Saving/Saves/game.json";
+                                if (System.IO.File.Exists(savePath))
+                                    System.IO.File.Delete(savePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Could not delete game save: " + ex.Message);
+                            }
 
                             this.Close();
                             return;
