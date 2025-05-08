@@ -1,63 +1,70 @@
 # ChessGames
 
-## Projekta mērķis
-Šī projekta mērķis ir izveidot konsoles spēli, kurā lietotāji var spēlēt šahu un dambreti pret citu spēlētāju. Projekts piedāvā arī grafisko lietotāja interfeisu šaha spēlei, kā arī iespēju pārvaldīt spēlētājus un ielādēt saglabātas spēles.
+## Projekta apraksts
+ChessGames ir C#/.NET 6.0 projekts, kas ļauj spēlēt šahu un dambreti ar grafisko (WinForms) interfeisu. Lietotāji var pārvaldīt spēlētājus, saglabāt un ielādēt spēles, kā arī sekot līdzi uzvarām.
 
 ## Funkcionalitāte
-- **Šaha un dambretes spēle**: Lietotāji var izvēlēties starp šahu un dambreti.
-- **Grafiskais interfeiss šaham**: Šaha spēlei ir pieejams grafiskais interfeiss ar pielāgotām šaha figūrām un lauciņiem.
-- **Spēlētāju pārvaldība**: Iespēja pievienot jaunus spēlētājus un apskatīt esošos.
-- **Saglabāto spēļu ielāde**: Lietotāji var ielādēt iepriekš saglabātas spēles no JSON failiem.
-- **Galvenā izvēlne**: Lietotāji var izvēlēties starp jaunas spēles sākšanu, saglabātas spēles ielādi, spēlētāju pārvaldību vai iziešanu no programmas.
-
-## Lietotāja interfeiss
-- **Šaha dēlis**: 
-  - Gaiši un tumši lauciņi (mahagonija un sarkanā koka dizains).
-  - Figūras izgatavotas no gaiša bērza un tumša ozola.
-  - Pelēki punkti norāda iespējamos gājienus izvēlētajai figūrai.
-  - Karalis kļūst sarkans, ja tas ir apdraudēts, un apgāžas, ja tiek zaudēts.
-- **Taimeris**: Iespēja iestatīt spēles laika ierobežojumu.
+- **Šahs un dambrete**: Spēlē pret citu spēlētāju.
+- **Grafiskais interfeiss šaham un dambretei**: WinForms logs ar vizuālu dēli, figūrām un taimeriem.
+- **Spēlētāju pārvaldība**: Pievieno jaunus spēlētājus, skati uzvaras.
+- **Saglabāšana un ielāde**: Spēles stāvokli var saglabāt un atjaunot vēlāk.
+- **Galvenā izvēlne**: Jauna spēle, ielādēt spēli, spēlētāju pārvaldība, iziešana.
 
 ## Projekta struktūra
-ChessGames/ \
-├── ConsoleApp1/ \
-│ ├── Games/ \
-│ │ ├── CheckersLogic.cs \
-│ │ └── ChessLogic.cs \
-│ ├── Menus/ \
-│ │ ├── NewGame.cs \
-│ │ └── Players.cs \
-│ ├── UI/ \
-│ │ ├── ChessBoardForm.cs \
-│ │ └── Image/ \
-│ │ ├── white.png \
-│ │ └── black.png \
-│ ├── Program.cs \
-│ └── ConsoleApp1.csproj \
-├── .vscode/ \
-│ ├── launch.json \
-│ ├── settings.json \
-│ └── tasks.json \
-├── README.md \
-└── .gitignore \
+```
+ChessGames/
+├── ConsoleApp1/
+│   ├── Games/
+│   │   ├── ChessLogic.cs
+│   │   └── CheckersLogic.cs
+│   ├── Menus/
+│   │   ├── GameOptions.cs
+│   │   ├── LoadGameMenu.cs
+│   │   ├── Players.cs
+│   │   └── Players/
+│   │       └── PlayerCreate.cs
+│   ├── Saving/
+│   │   ├── GameSaving.cs
+│   │   ├── PlayerSaving.cs
+│   │   └── Saves/
+│   ├── UI/
+│   │   ├── GameBoardForm.cs
+│   │   └── Image/
+│   ├── Program.cs
+│   └── ConsoleApp1.csproj
+├── .vscode/
+│   ├── launch.json
+│   ├── settings.json
+│   └── tasks.json
+├── README.md
+└── .gitignore
+```
 
-## Kā sākt
-1. **Nepieciešamās prasības**:
-   - .NET 6.0 SDK vai jaunāka versija.
-   - Windows operētājsistēma (WinForms atbalstam).
+## Uzsākšana
+1. **Prasības**:
+   - .NET 6.0 SDK vai jaunāka versija
+   - Windows (WinForms atbalstam)
 
-2. **Projekta palaišana**:
-   - Atveriet projektu Visual Studio vai jebkurā citā IDE, kas atbalsta .NET.
-   - Izpildiet komandu `dotnet build`, lai izveidotu projektu.
-   - Izpildiet komandu `dotnet run`, lai palaistu programmu.
+2. **Palaišana**:
+   - Atveriet projektu Visual Studio vai VS Code.
+   - Kompilējiet:  
+     `dotnet build ChessGames/ConsoleApp1/ConsoleApp1.csproj`
+   - Palaidiet:  
+     `dotnet run --project ChessGames/ConsoleApp1/ConsoleApp1.csproj`
 
 3. **Failu struktūra**:
-   - Grafiskā interfeisa attēli atrodas mapē `UI/Image/`.
-   - Spēles loģika ir mapē `Games/`.
+   - Spēles loģika: `Games/`
+   - Saglabāšana: `Saving/`
+   - Grafiskie attēli: `UI/Image/`
 
-## Veidotāji
-- Roberts Dāvidsons 
+## Lietotāja interfeiss
+- **Dēlis**: Gaiši/tumši lauciņi, pielāgotas figūras.
+- **Taimeris**: Katram spēlētājam atsevišķs laiks.
+- **Uzvaras**: Uzvarētājs tiek reģistrēts JSON failā.
+
+## Autori
+- Roberts Dāvidsons
 - Šarlote Tērmane
 
-## Licences informācija
-Šis projekts ir izstrādāts mācību nolūkiem un nav paredzēts komerciālai lietošanai.
+## Licence
+Projekts paredzēts mācību nolūkiem.
