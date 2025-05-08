@@ -223,18 +223,6 @@ namespace ConsoleApp1.Games
             {
                 if (board[endX, endY] != null) return true;
 
-                // En passant
-                if (lastMove.HasValue)
-                {
-                    var (lastX, lastY) = lastMove.Value;
-                    if (board[startX, endY] != null &&
-                        board[startX, endY] == (piece.StartsWith("W") ? "BPawn" : "WPawn") &&
-                        lastX == startX && lastY == endY &&
-                        Math.Abs(lastX - endX) == 1)
-                    {
-                        return true;
-                    }
-                }
             }
             return false;
         }
