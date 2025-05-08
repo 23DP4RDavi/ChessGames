@@ -161,5 +161,61 @@ namespace ConsoleApp1.Games
         }
 
         public bool IsWhiteTurn => isWhiteTurn;
+
+        public bool IsWin(out string winner)
+        {
+            bool whiteExists = false, blackExists = false;
+            bool whiteCanMove = false, blackCanMove = false;
+
+            for (int row = 0; row < BoardSize; row++)
+            {
+                for (int col = 0; col < BoardSize; col++)
+                {
+                    string piece = board[row, col];
+                    if (piece == null) continue;
+                    if (piece.StartsWith("W"))
+                    {
+                        whiteExists = true;
+                        if (!whiteCanMove && HasAnyValidMove(row, col))
+                            whiteCanMove = true;
+                    }
+                    else if (piece.StartsWith("B"))
+                    {
+                        blackExists = true;
+                        if (!blackCanMove && HasAnyValidMove(row, col))
+                            blackCanMove = true;
+                    }
+                }
+            }
+
+            if (!whiteExists || !whiteCanMove)
+            {
+                winner = "B";
+                return true;
+            }
+            if (!blackExists || !blackCanMove)
+            {
+                winner = "W";
+                return true;
+            }
+            winner = null;
+            return false;
+        }
+
+        private bool HasAnyValidMove(int row, int col)
+        {
+            for (int dr = -2; dr <= 2; dr++)
+            {
+                for (int dc = -2; dc <= 2; dc++)
+                {
+                    if (dr == 0 && dc == 0) continue;
+                    int newRow = row + dr;
+                    int newCol = col + dc;
+                    if (IsValidMove(row, col, newRow, newCol))
+                        return true;
+                }
+            }
+            return false;
+        }
     }
 }

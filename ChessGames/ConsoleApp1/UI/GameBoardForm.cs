@@ -307,14 +307,37 @@ namespace ChessGames.UI
 
                     RenderPieces();
 
-                    //  for checkmate if chess
+                    // Chess win
                     if (gameLogic is ChessLogic chessLogic2 && chessLogic2.IsCheckmate())
                     {
                         timer.Stop();
                         string winner = isWhiteTurn ? blackPlayerName : whitePlayerName;
                         MessageBox.Show($"Checkmate! {winner} wins!");
+
+                        // Record win in JSON
+                        var playerSaving = new PlayerSaving();
+                        playerSaving.RecordWin(winner, "chess");
+
                         this.Close();
                         return;
+                    }
+
+                    // Checkers win
+                    if (gameLogic is CheckersLogic checkersLogic2)
+                    {
+                        if (checkersLogic2.IsWin(out string winnerColor))
+                        {
+                            timer.Stop();
+                            string winnerName = winnerColor == "W" ? whitePlayerName : blackPlayerName;
+                            MessageBox.Show($"{winnerName} wins!");
+
+                            // Record win in JSON
+                            var playerSaving = new PlayerSaving();
+                            playerSaving.RecordWin(winnerName, "checkers");
+
+                            this.Close();
+                            return;
+                        }
                     }
 
                     isWhiteTurn = !isWhiteTurn;
