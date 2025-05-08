@@ -153,8 +153,7 @@ namespace ConsoleApp1.Games
             }
             if (!valid) return false;
 
-            // --- Check if move leaves own king in check ---
-            // Temporarily make the move
+            // Check if move leaves own king in check
             string originalTarget = board[endX, endY];
             board[endX, endY] = piece;
             board[startX, startY] = null;
