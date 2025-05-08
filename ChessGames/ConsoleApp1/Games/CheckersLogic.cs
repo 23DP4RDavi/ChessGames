@@ -164,7 +164,7 @@ namespace ConsoleApp1.Games
 
         public bool IsWin(out string winner)
         {
-            bool whiteExists = false, blackExists = false;
+            int whiteCount = 0, blackCount = 0;
             bool whiteCanMove = false, blackCanMove = false;
 
             for (int row = 0; row < BoardSize; row++)
@@ -175,35 +175,49 @@ namespace ConsoleApp1.Games
                     if (piece == null) continue;
                     if (piece.StartsWith("W"))
                     {
-                        whiteExists = true;
+                        whiteCount++;
                         if (!whiteCanMove && HasAnyValidMove(row, col))
                             whiteCanMove = true;
                     }
                     else if (piece.StartsWith("B"))
                     {
-                        blackExists = true;
+                        blackCount++;
                         if (!blackCanMove && HasAnyValidMove(row, col))
                             blackCanMove = true;
                     }
                 }
             }
 
-            if (!whiteExists || !whiteCanMove)
+            // Only check for win for the player whose turn it is
+            if (isWhiteTurn)
             {
-                winner = "B";
-                return true;
+                // If white can't move or has no pieces, black wins
+                if (whiteCount == 0 || !whiteCanMove)
+                {
+                    winner = "B";
+                    return true;
+                }
             }
-            if (!blackExists || !blackCanMove)
+            else
             {
-                winner = "W";
-                return true;
+                // If black can't move or has no pieces, white wins
+                if (blackCount == 0 || !blackCanMove)
+                {
+                    winner = "W";
+                    return true;
+                }
             }
+
             winner = null;
             return false;
         }
 
         private bool HasAnyValidMove(int row, int col)
         {
+            string piece = board[row, col];
+            if (piece == null) return false;
+
+            // Try all possible moves for this piece
             for (int dr = -2; dr <= 2; dr++)
             {
                 for (int dc = -2; dc <= 2; dc++)
@@ -211,7 +225,7 @@ namespace ConsoleApp1.Games
                     if (dr == 0 && dc == 0) continue;
                     int newRow = row + dr;
                     int newCol = col + dc;
-                    if (IsValidMove(row, col, newRow, newCol))
+                    if (IsWithinBounds(newRow, newCol) && IsValidMove(row, col, newRow, newCol))
                         return true;
                 }
             }
