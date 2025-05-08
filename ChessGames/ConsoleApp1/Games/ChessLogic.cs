@@ -140,14 +140,68 @@ namespace ConsoleApp1.Games
                 return false;
 
             string pieceType = piece.Substring(1);
+            bool valid = false;
             switch (pieceType)
             {
-                case "Pawn": return IsValidPawnMove(piece, startX, startY, endX, endY);
-                case "Rook": return IsValidRookMove(startX, startY, endX, endY);
-                case "Knight": return IsValidKnightMove(startX, startY, endX, endY);
-                case "Bishop": return IsValidBishopMove(startX, startY, endX, endY);
-                case "Queen": return IsValidQueenMove(startX, startY, endX, endY);
-                case "King": return IsValidKingMove(startX, startY, endX, endY);
+                case "Pawn": valid = IsValidPawnMove(piece, startX, startY, endX, endY); break;
+                case "Rook": valid = IsValidRookMove(startX, startY, endX, endY); break;
+                case "Knight": valid = IsValidKnightMove(startX, startY, endX, endY); break;
+                case "Bishop": valid = IsValidBishopMove(startX, startY, endX, endY); break;
+                case "Queen": valid = IsValidQueenMove(startX, startY, endX, endY); break;
+                case "King": valid = IsValidKingMove(startX, startY, endX, endY); break;
+                default: valid = false; break;
+            }
+            if (!valid) return false;
+
+            // --- Check if move leaves own king in check ---
+            // Temporarily make the move
+            string originalTarget = board[endX, endY];
+            board[endX, endY] = piece;
+            board[startX, startY] = null;
+            // Update king position if moving king
+            (int oldKingX, int oldKingY) = isWhiteTurn ? WhiteKingPosition : BlackKingPosition;
+            bool movedKing = pieceType == "King";
+            if (movedKing)
+            {
+                if (isWhiteTurn) WhiteKingPosition = (endX, endY);
+                else BlackKingPosition = (endX, endY);
+            }
+            bool inCheck = IsInCheck(isWhiteTurn);
+            // Undo move
+            board[startX, startY] = piece;
+            board[endX, endY] = originalTarget;
+            if (movedKing)
+            {
+                if (isWhiteTurn) WhiteKingPosition = (oldKingX, oldKingY);
+                else BlackKingPosition = (oldKingX, oldKingY);
+            }
+            return !inCheck;
+        }
+
+        private bool IsValidMove(string piece, int startRow, int startCol, int endRow, int endCol, bool ignoreTurn)
+        {
+            if (piece == null) return false;
+            if (startRow < 0 || startRow >= GridSize || startCol < 0 || startCol >= GridSize ||
+                endRow < 0 || endRow >= GridSize || endCol < 0 || endCol >= GridSize)
+                return false;
+            // Only skip turn check if ignoreTurn is true
+            if (!ignoreTurn)
+            {
+                if (isWhiteTurn && piece.StartsWith("B")) return false;
+                if (!isWhiteTurn && piece.StartsWith("W")) return false;
+            }
+            if (board[endRow, endCol] != null && board[endRow, endCol].StartsWith(piece[0].ToString()))
+                return false;
+
+            string pieceType = piece.Substring(1);
+            switch (pieceType)
+            {
+                case "Pawn": return IsValidPawnMove(piece, startRow, startCol, endRow, endCol);
+                case "Rook": return IsValidRookMove(startRow, startCol, endRow, endCol);
+                case "Knight": return IsValidKnightMove(startRow, startCol, endRow, endCol);
+                case "Bishop": return IsValidBishopMove(startRow, startCol, endRow, endCol);
+                case "Queen": return IsValidQueenMove(startRow, startCol, endRow, endCol);
+                case "King": return IsValidKingMove(startRow, startCol, endRow, endCol);
                 default: return false;
             }
         }
@@ -278,15 +332,36 @@ namespace ConsoleApp1.Games
 
         // --- Special rules and helpers ---
 
-        private bool IsInCheck(bool white)
+        public bool IsInCheck(bool white)
         {
-            var king = white ? "WKing" : "BKing";
-            var pos = white ? WhiteKingPosition : BlackKingPosition;
-            for (int x = 0; x < GridSize; x++)
-                for (int y = 0; y < GridSize; y++)
-                    if (board[x, y] != null && board[x, y][0] != king[0])
-                        if (IsValidMove(board[x, y], x, y, pos.x, pos.y))
+            // Find king position
+            string king = white ? "WKing" : "BKing";
+            int kingRow = -1, kingCol = -1;
+            for (int i = 0; i < GridSize; i++)
+                for (int j = 0; j < GridSize; j++)
+                    if (board[i, j] == king)
+                    {
+                        kingRow = i;
+                        kingCol = j;
+                        break;
+                    }
+
+            if (kingRow == -1) return false; // King not found
+
+            // Check all opponent pieces for attack on king
+            for (int i = 0; i < GridSize; i++)
+            {
+                for (int j = 0; j < GridSize; j++)
+                {
+                    string piece = board[i, j];
+                    if (piece == null) continue;
+                    if (white && piece.StartsWith("B") || !white && piece.StartsWith("W"))
+                    {
+                        if (IsValidMove(piece, i, j, kingRow, kingCol, ignoreTurn: true))
                             return true;
+                    }
+                }
+            }
             return false;
         }
 
@@ -323,8 +398,8 @@ namespace ConsoleApp1.Games
 
         public bool IsCheckmate()
         {
-            // If not in check, can't be checkmate
-            if (!IsInCheck(isWhiteTurn))
+            bool white = isWhiteTurn;
+            if (!IsInCheck(white))
                 return false;
 
             // Try every possible move for the current player
@@ -334,7 +409,7 @@ namespace ConsoleApp1.Games
                 {
                     string piece = board[x, y];
                     if (piece == null) continue;
-                    if ((isWhiteTurn && piece.StartsWith("W")) || (!isWhiteTurn && piece.StartsWith("B")))
+                    if ((white && piece.StartsWith("W")) || (!white && piece.StartsWith("B")))
                     {
                         for (int i = 0; i < GridSize; i++)
                         {
@@ -346,7 +421,7 @@ namespace ConsoleApp1.Games
                                     string captured = board[i, j];
                                     board[i, j] = piece;
                                     board[x, y] = null;
-                                    bool stillInCheck = IsInCheck(isWhiteTurn);
+                                    bool stillInCheck = IsInCheck(white);
                                     // Undo move
                                     board[x, y] = piece;
                                     board[i, j] = captured;

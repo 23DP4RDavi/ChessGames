@@ -3,8 +3,8 @@
     [
       "BRook",
       "BKnight",
-      "BBishop",
       null,
+      "BQueen",
       "BKing",
       "BBishop",
       "BKnight",
@@ -13,10 +13,10 @@
     [
       "BPawn",
       "BPawn",
-      "BQueen",
-      null,
+      "BPawn",
       null,
       "BPawn",
+      null,
       "BPawn",
       "BPawn"
     ],
@@ -34,10 +34,20 @@
       null,
       null,
       null,
+      "BPawn",
+      null,
+      "BPawn",
+      null,
+      null
+    ],
+    [
+      "BBishop",
+      null,
+      "WPawn",
       null,
       null,
       null,
-      null,
+      "WPawn",
       null
     ],
     [
@@ -51,30 +61,20 @@
       null
     ],
     [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-    ],
-    [
-      "WPawn",
       "WPawn",
       "WPawn",
       null,
       "WPawn",
       "WPawn",
       "WPawn",
+      null,
       "WPawn"
     ],
     [
       "WRook",
       "WKnight",
       "WBishop",
-      "WQueen",
+      null,
       "WKing",
       "WBishop",
       "WKnight",
@@ -83,10 +83,10 @@
   ],
   "WhiteCaptured": [],
   "BlackCaptured": [],
-  "WhiteTime": 237,
-  "BlackTime": 237,
+  "WhiteTime": 223,
+  "BlackTime": 273,
   "IsWhiteTurn": true,
-  "WhitePlayerName": "\u0160arlote",
-  "BlackPlayerName": "Roberts",
+  "WhitePlayerName": "Roberts",
+  "BlackPlayerName": "\u0160arlote",
   "GameType": "Chess"
 }
