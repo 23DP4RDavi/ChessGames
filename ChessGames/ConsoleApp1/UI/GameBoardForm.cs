@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using ConsoleApp1.Games;
+using ConsoleApp1.Saving;
 
 namespace ChessGames.UI
 {
@@ -17,6 +18,7 @@ namespace ChessGames.UI
         private Image whiteTileBackground;
         private Image blackTileBackground;
         private (int row, int col)? selectedTile = null;
+        private GameSaving gameSaving = new GameSaving();
 
         // HUD
         private Label lblWhiteName, lblBlackName;
@@ -276,7 +278,7 @@ namespace ChessGames.UI
                     )
                     {
                         selectedTile = (row, col);
-                        HighlightTile(row, col, Color.Yellow);
+                        HighlightTile(row, col, Color.Red);
                     }
                 }
             }
@@ -304,7 +306,21 @@ namespace ChessGames.UI
                         HandlePawnPromotion(row, col);
 
                     RenderPieces();
+
+                    //  for checkmate if chess
+                    if (gameLogic is ChessLogic chessLogic2 && chessLogic2.IsCheckmate())
+                    {
+                        timer.Stop();
+                        string winner = isWhiteTurn ? blackPlayerName : whitePlayerName;
+                        MessageBox.Show($"Checkmate! {winner} wins!");
+                        this.Close();
+                        return;
+                    }
+
                     isWhiteTurn = !isWhiteTurn;
+
+                    // Save game after every move 
+                    SaveCurrentGame();
                 }
                 else
                 {
@@ -314,6 +330,29 @@ namespace ChessGames.UI
                 UnhighlightTile(startRow, startCol);
                 selectedTile = null;
             }
+        }
+
+        private void SaveCurrentGame()
+        {
+            List<List<string>> boardList = null;
+            if (gameLogic is ChessLogic chessLogic)
+                boardList = ToListBoard(chessLogic.Board);
+            else if (gameLogic is CheckersLogic checkersLogic)
+                boardList = ToListBoard(checkersLogic.Board);
+
+            var gameState = new GameState
+            {
+                Board = boardList,
+                WhiteCaptured = whiteCaptured,
+                BlackCaptured = blackCaptured,
+                WhiteTime = whiteTime,
+                BlackTime = blackTime,
+                IsWhiteTurn = isWhiteTurn,
+                WhitePlayerName = whitePlayerName,
+                BlackPlayerName = blackPlayerName,
+                GameType = (gameLogic is ChessLogic) ? "Chess" : "Checkers"
+            };
+            gameSaving.SaveGame(gameState);
         }
 
         // Helper methods to access turn state
@@ -410,6 +449,19 @@ namespace ChessGames.UI
                     }
                 }
             }
+        }
+
+        private List<List<string>> ToListBoard(string[,] board)
+        {
+            var list = new List<List<string>>();
+            for (int i = 0; i < board.GetLength(0); i++)
+            {
+                var row = new List<string>();
+                for (int j = 0; j < board.GetLength(1); j++)
+                    row.Add(board[i, j]);
+                list.Add(row);
+            }
+            return list;
         }
     }
 

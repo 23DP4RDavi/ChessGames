@@ -1,0 +1,92 @@
+{
+  "Board": [
+    [
+      "BRook",
+      "BKnight",
+      "BBishop",
+      null,
+      "BKing",
+      "BBishop",
+      "BKnight",
+      "BRook"
+    ],
+    [
+      "BPawn",
+      "BPawn",
+      "BQueen",
+      null,
+      null,
+      "BPawn",
+      "BPawn",
+      "BPawn"
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      "WPawn",
+      "WPawn",
+      "WPawn",
+      null,
+      "WPawn",
+      "WPawn",
+      "WPawn",
+      "WPawn"
+    ],
+    [
+      "WRook",
+      "WKnight",
+      "WBishop",
+      "WQueen",
+      "WKing",
+      "WBishop",
+      "WKnight",
+      "WRook"
+    ]
+  ],
+  "WhiteCaptured": [],
+  "BlackCaptured": [],
+  "WhiteTime": 237,
+  "BlackTime": 237,
+  "IsWhiteTurn": true,
+  "WhitePlayerName": "\u0160arlote",
+  "BlackPlayerName": "Roberts",
+  "GameType": "Chess"
+}

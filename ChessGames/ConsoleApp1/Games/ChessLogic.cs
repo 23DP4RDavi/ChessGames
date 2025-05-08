@@ -321,6 +321,47 @@ namespace ConsoleApp1.Games
             return true;
         }
 
+        public bool IsCheckmate()
+        {
+            // If not in check, can't be checkmate
+            if (!IsInCheck(isWhiteTurn))
+                return false;
+
+            // Try every possible move for the current player
+            for (int x = 0; x < GridSize; x++)
+            {
+                for (int y = 0; y < GridSize; y++)
+                {
+                    string piece = board[x, y];
+                    if (piece == null) continue;
+                    if ((isWhiteTurn && piece.StartsWith("W")) || (!isWhiteTurn && piece.StartsWith("B")))
+                    {
+                        for (int i = 0; i < GridSize; i++)
+                        {
+                            for (int j = 0; j < GridSize; j++)
+                            {
+                                if (IsValidMove(piece, x, y, i, j))
+                                {
+                                    // Make the move temporarily
+                                    string captured = board[i, j];
+                                    board[i, j] = piece;
+                                    board[x, y] = null;
+                                    bool stillInCheck = IsInCheck(isWhiteTurn);
+                                    // Undo move
+                                    board[x, y] = piece;
+                                    board[i, j] = captured;
+                                    if (!stillInCheck)
+                                        return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // No legal moves to escape check
+            return true;
+        }
+
         private string GetBoardKey()
         {
             var key = "";

@@ -25,7 +25,7 @@ namespace ConsoleApp1.Saving
 
     public class GameState
     {
-        public string[,] Board { get; set; }
+        public List<List<string>> Board { get; set; }
         public List<string> WhiteCaptured { get; set; }
         public List<string> BlackCaptured { get; set; }
         public int WhiteTime { get; set; }

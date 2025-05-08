@@ -63,6 +63,7 @@ ___________________________________________________________________
                     break;
                 case 1:
                     Console.WriteLine("Load Game selected...");
+                    LoadGameMenu.Show();
                     Console.WriteLine("Press any key to return to the main menu...");
                     Console.ReadKey();
                     break;
