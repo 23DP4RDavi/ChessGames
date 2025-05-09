@@ -57,6 +57,19 @@ namespace ConsoleApp1.Saving
             Console.WriteLine("Win recorded successfully.");
         }
 
+        public void DeletePlayer(string name)
+        {
+            var player = players.Find(p => p.Name == name);
+            if (player == null)
+            {
+                Console.WriteLine("Player not found.");
+                return;
+            }
+            players.Remove(player);
+            SavePlayers();
+            Console.WriteLine("Player deleted successfully.");
+        }
+
         public void DisplayPlayers()
         {
             Console.WriteLine("Players:");
@@ -64,6 +77,26 @@ namespace ConsoleApp1.Saving
             {
                 Console.WriteLine($"Name: {player.Name}, Chess Wins: {player.ChessWins}, Checkers Wins: {player.CheckersWins}");
             }
+        }
+
+        public List<string> GetPlayerNames()
+        {
+            List<string> names = new List<string>();
+            foreach (var player in players)
+            {
+                names.Add(player.Name);
+            }
+            return names;
+        }
+
+        public List<PlayerInfo> GetAllPlayers()
+        {
+            var list = new List<PlayerInfo>();
+            foreach (var p in players)
+            {
+                list.Add(new PlayerInfo { Name = p.Name, ChessWins = p.ChessWins, CheckersWins = p.CheckersWins });
+            }
+            return list;
         }
 
         private void LoadPlayers()
@@ -115,5 +148,12 @@ namespace ConsoleApp1.Saving
             public int ChessWins { get; set; }
             public int CheckersWins { get; set; }
         }
+    }
+
+    public class PlayerInfo
+    {
+        public string Name { get; set; }
+        public int ChessWins { get; set; }
+        public int CheckersWins { get; set; }
     }
 }
