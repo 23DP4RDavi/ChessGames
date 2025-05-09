@@ -11,7 +11,6 @@ namespace ConsoleApp1.Games
         public (int x, int y) WhiteKingPosition { get; private set; }
         public (int x, int y) BlackKingPosition { get; private set; }
         private bool isWhiteTurn = true;
-        private (int x, int y)? lastMove;
 
         // Castling flags
         private bool whiteKingMoved = false, blackKingMoved = false;
@@ -122,7 +121,6 @@ namespace ConsoleApp1.Games
             if (piece == "WKing") WhiteKingPosition = (endX, endY);
             if (piece == "BKing") BlackKingPosition = (endX, endY);
 
-            lastMove = (endX, endY);
             isWhiteTurn = !isWhiteTurn;
             UpdatePositionCounts();
             return true;
